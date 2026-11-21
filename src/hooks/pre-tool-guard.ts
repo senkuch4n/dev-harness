@@ -28,7 +28,8 @@ guard(() => {
   const tool = input.tool_name ?? "";
   const ti = input.tool_input ?? {};
   const ticketId = getActiveTicket(repoDir);
-  const lane = ticketId ? loadState(repoDir, ticketId)?.lane : undefined;
+  const st = ticketId ? loadState(repoDir, ticketId) : undefined;
+  const lane = st?.lane;
 
   if (tool === "Bash") {
     const reason = checkBash(String(ti.command ?? ""), {
@@ -40,8 +41,8 @@ guard(() => {
 
     // Riesgo alto → el push exige un OK humano registrado para este HEAD exacto.
     if (cfg.guard.humanOkForHighRiskPush && isPush(String(ti.command ?? ""))) {
-      const files = changedFiles(repoDir, baseRev(repoDir, cfg, lane));
-      const risk = assessRiskFor(repoDir, files, lane ?? "bugfix", cfg);
+      const files = changedFiles(repoDir, baseRev(repoDir, cfg, lane, st?.baseOverride));
+      const risk = assessRiskFor(repoDir, files, lane ?? "bugfix", cfg, st?.baseOverride);
       if (risk.level === "high" && !hasHumanOkForHead(repoDir)) {
         block(
           `Riesgo ALTO (${risk.criticalFiles.slice(0, 5).join(", ") || "ver riesgo"}): no se pushea sin el OK del usuario. Pedíselo explicando qué cambia y cómo se revierte; cuando lo dé, registralo con la tool record_human_ok y reintentá. Integrar en local sí está permitido.`,

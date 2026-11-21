@@ -17,7 +17,7 @@ Seguí estos pasos en orden. No saltees ninguno.
 Si no podés leer el ticket, pedile el texto al usuario.
 
 ## 2. Registrar y traer la memoria
-Llamá a la tool `start_ticket` (servidor `harness`) con id, título y cuerpo. Te devuelve los tickets parecidos y si el ticket ya estaba en curso (`resumed`). Si estaba en curso, llamá a `get_ticket` y continuá desde donde quedó.
+Llamá a la tool `start_ticket` (servidor `harness`) con id, título y cuerpo. Si el usuario te indicó otra rama base para este ticket (por ejemplo, porque el arnés todavía no está integrado en la base habitual), pasala en `baseBranch`; si no, no la pases. Si el ticket estaba escalado, `start_ticket` lo reabre (`reopened: true`). Te devuelve los tickets parecidos y si el ticket ya estaba en curso (`resumed`). Si estaba en curso, llamá a `get_ticket` y continuá desde donde quedó.
 
 ## 3. Guardrail de entrada
 Frená y pedí información (comentando en el ticket) si:
@@ -48,6 +48,7 @@ Invocá la skill que indica `nextSkill`:
 - Usá `run_checks` durante el trabajo (es barato) y `run_gate` UNA vez al final. Nunca corras la suite e2e completa.
 - El hook Stop no te deja terminar sin un gate OK para el diff actual.
 - Registrá hipótesis, descartes y decisiones con `update_ticket_state`. Otros agentes leen esa memoria.
+- **Si necesitás algo del usuario** (una respuesta, una decisión, que mueva un archivo, que cambie una config protegida), llamá a `pause_ticket` con lo que necesitás y terminá el turno. **No cierres el ticket como escalado solo para poder terminar.** Cuando el usuario responda, seguís desde donde quedaste.
 - Si `run_gate` responde **RE-CARRIL**, seguí lo que dice: la skill `lane-full-feature` o el flujo propio del repo si está delegado.
 - **Riesgo alto:** el hook no deja pushear sin el OK del usuario. Pedíselo explicando qué cambia y cómo se revierte; cuando lo dé, llamá a `record_human_ok` con su frase textual.
 - Si el gate dice que hay que **commitear antes** (el análisis de impacto del repo mira commits), hacé un commit de trabajo y volvé a correrlo.

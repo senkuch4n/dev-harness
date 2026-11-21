@@ -39,7 +39,7 @@ guard(() => {
   process.stdout.write(
     JSON.stringify({
       decision: "block",
-      reason: `[dev-harness] ${status.reason} Ticket ${ticketId} (carril ${s.lane}). Llamá a la tool run_gate con el resumen (symptom, rootCause, fix). Si falla, corregí y reintentá; si ya no podés avanzar, explicá el bloqueo y llamá a close_ticket con outcome "escalated". (aviso ${s.stopBlocks}/${maxStopBlocks})`,
+      reason: `[dev-harness] ${status.reason} Ticket ${ticketId} (carril ${s.lane}). Llamá a la tool run_gate con el resumen (symptom, rootCause, fix). Si falla, corregí y reintentá. Si necesitás una respuesta o una acción del usuario para seguir, llamá a pause_ticket con lo que necesitás (eso te deja terminar el turno sin cerrar el ticket). Si ya no se puede avanzar, close_ticket con outcome "escalated". (aviso ${s.stopBlocks}/${maxStopBlocks})`,
     }),
   );
   allow();

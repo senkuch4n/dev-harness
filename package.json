@@ -1,6 +1,6 @@
 {
   "name": "dev-harness",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Arnés agéntico para desarrollo y mantenimiento: carriles por riesgo, gate determinístico y memoria. Plugin de Claude Code.",
   "directories": {
     "test": "tests"

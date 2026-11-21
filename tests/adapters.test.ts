@@ -195,3 +195,35 @@ describe("memoria sobre la historia del repo", () => {
     expect(existsSync(join(repo, ".harness/config.json"))).toBe(true);
   });
 });
+
+describe("v0.2.1: base por ticket, pausa y basura suelta", () => {
+  beforeEach(() => makeRepo());
+
+  it("ignora .patch sueltos y usa la base del ticket", async () => {
+    ticket();
+    // otra rama con commits "del arnés" que no están en develop
+    sh("git", ["checkout", "-q", "develop"]);
+    sh("git", ["checkout", "-q", "-b", "prueba/arnes"]);
+    writeFileSync(join(repo, "AGENTS.md"), "arnés\n");
+    commit("arnés");
+    sh("git", ["checkout", "-q", "-b", "chore/chip"]);
+    writeFileSync(join(repo, "client/components/Boton.tsx"), "export const a = 11;\n");
+    commit("chip");
+    writeFileSync(join(repo, "evidentia-dev-harness.patch"), "x");
+    updateState(repo, "#10", (s) => (s.baseOverride = "prueba/arnes"));
+    const g = await runGate(repo, "#10", summary);
+    expect(g.passed).toBe(true);
+    expect(g.message).not.toMatch(/AGENTS/);
+  });
+
+  it("en pausa, el hook Stop deja terminar", () => {
+    ticket();
+    writeFileSync(join(repo, "client/components/Boton.tsx"), "export const a = 12;\n");
+    expect(gateStatusForStop(repo, "#10").mustBlock).toBe(true);
+    updateState(repo, "#10", (s) => {
+      s.status = "waiting-user";
+      s.waitingFor = "que el usuario mueva los patch";
+    });
+    expect(gateStatusForStop(repo, "#10").mustBlock).toBe(false);
+  });
+});

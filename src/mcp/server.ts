@@ -14,7 +14,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { agentMap, hasConfig, loadConfig } from "../core/config.js";
 import { runStep } from "../core/exec.js";
-import { currentPlan, runGate, runInner } from "../core/gate.js";
+import { currentPlan, isNoise, runGate, runInner } from "../core/gate.js";
 import { baseRev } from "../core/base.js";
 import { changedFiles, headSha } from "../core/git.js";
 import { writeHumanOk } from "../core/human-ok.js";
@@ -33,7 +33,7 @@ import {
 
 const repoDir = process.env.DEV_HARNESS_REPO || process.cwd();
 
-const server = new McpServer({ name: "harness", version: "0.2.0" });
+const server = new McpServer({ name: "harness", version: "0.2.1" });
 
 type Content = { content: { type: "text"; text: string }[]; isError?: boolean };
 
@@ -49,6 +49,10 @@ function ticketOrActive(id?: string): string {
   const t = id || getActiveTicket(repoDir);
   if (!t) throw new Error("No hay ticket activo en este worktree. Llamá a start_ticket.");
   return t;
+}
+
+function resume(id: string): void {
+  if (loadState(repoDir, id)?.status === "waiting-user") updateState(repoDir, id, (st) => (st.status = "open"));
 }
 
 /** Envuelve handlers para devolver errores como texto útil al agente. */
@@ -76,17 +80,37 @@ server.registerTool(
       ticketId: z.string().describe("Ej: LIN-123 o GH-45"),
       title: z.string(),
       body: z.string().default("").describe("Descripción del ticket, para buscar tickets parecidos"),
-      source: z.string().optional().describe("linear | github | manual"),
+      source: z.string().optional().describe("linear | github | gitlab | manual"),
+      baseBranch: z
+        .string()
+        .optional()
+        .describe("SOLO si el usuario lo pide: rama base para este ticket (p. ej. cuando el arnés todavía no está integrado en la base habitual)."),
     },
   },
-  safe(({ ticketId, title, body, source }) => {
+  safe(({ ticketId, title, body, source, baseBranch }) => {
     const cfg = loadConfig(repoDir);
-    const s = createState(repoDir, ticketId, title, source);
+    createState(repoDir, ticketId, title, source);
+    let reopened = false;
+    const s = updateState(repoDir, ticketId, (st) => {
+      if (baseBranch) st.baseOverride = baseBranch;
+      if (st.status === "waiting-user") st.status = "open";
+      // Volver a pedir el ticket es una decisión del usuario: un escalado se reabre con contadores nuevos.
+      if (st.status === "escalated") {
+        st.status = "open";
+        st.gateAttempts = 0;
+        st.stopBlocks = 0;
+        reopened = true;
+      }
+    });
+    if (reopened) appendJournal(repoDir, ticketId, { kind: "decision", text: "Reabierto por el usuario (estaba escalado): intentos del gate en 0." });
+    if (baseBranch) appendJournal(repoDir, ticketId, { kind: "decision", text: `Base del ticket: ${baseBranch} (pedido del usuario)` });
     setActiveTicket(repoDir, ticketId);
     const similar = searchMemory(repoDir, `${title} ${body}`, { limit: 5, cfg, existingFiles: (f) => existsSync(join(repoDir, f)) });
     return json({
       ticket: { id: s.ticketId, status: s.status, lane: s.lane ?? null, gateAttempts: s.gateAttempts },
       resumed: s.laneHistory.length > 0,
+      reopened,
+      base: s.baseOverride ?? null,
       agents: agentMap(cfg),
       delegatedLanes: cfg.lanes.delegate,
       similarPastTickets: similar,
@@ -187,8 +211,8 @@ server.registerTool(
     const id = ticketOrActive(ticketId);
     const cfg = loadConfig(repoDir);
     const s = loadState(repoDir, id);
-    const files = changedFiles(repoDir, baseRev(repoDir, cfg, s?.lane));
-    return json({ lane: s?.lane, files, risk: assessRiskFor(repoDir, files, s?.lane ?? "bugfix", cfg) });
+    const files = changedFiles(repoDir, baseRev(repoDir, cfg, s?.lane, s?.baseOverride)).filter((f) => !isNoise(f, cfg));
+    return json({ lane: s?.lane, base: baseRev(repoDir, cfg, s?.lane, s?.baseOverride), files, risk: assessRiskFor(repoDir, files, s?.lane ?? "bugfix", cfg, s?.baseOverride) });
   }),
 );
 
@@ -212,7 +236,9 @@ server.registerTool(
     inputSchema: optionalTicket,
   },
   safe(async ({ ticketId }) => {
-    const r = await runInner(repoDir, ticketOrActive(ticketId));
+    const id = ticketOrActive(ticketId);
+    resume(id);
+    const r = await runInner(repoDir, id);
     return text(`${r.ok ? "OK" : "FALLÓ"}\n\n${r.report}`, !r.ok);
   }),
 );
@@ -231,7 +257,9 @@ server.registerTool(
     },
   },
   safe(async ({ ticketId, ...summary }) => {
-    const g = await runGate(repoDir, ticketOrActive(ticketId), summary);
+    const id = ticketOrActive(ticketId);
+    resume(id);
+    const g = await runGate(repoDir, id, summary);
     return text(g.message, !g.passed);
   }),
 );
@@ -307,6 +335,26 @@ server.registerTool(
   safe(({ ticketId, ...lesson }) => {
     const file = proposeLesson(repoDir, { ...lesson, ticketId: ticketId || getActiveTicket(repoDir) }, loadConfig(repoDir));
     return text(`Lección pendiente en ${file.replace(repoDir + "/", "")}. Incluila en el PR para que la revise un humano.`);
+  }),
+);
+
+server.registerTool(
+  "pause_ticket",
+  {
+    description:
+      "Pausa el ticket porque necesitás algo del USUARIO (una respuesta, una decisión, una acción en su máquina). Te deja terminar el turno sin pasar el gate y sin cerrar el ticket. Se reanuda solo al volver a llamar start_ticket, run_checks o run_gate.",
+    inputSchema: { ...optionalTicket, waitingFor: z.string().describe("Qué necesitás del usuario, concreto") },
+  },
+  safe(({ ticketId, waitingFor }) => {
+    const id = ticketOrActive(ticketId);
+    updateState(repoDir, id, (st) => {
+      if (st.status === "open" || st.status === "gate-passed") {
+        st.status = "waiting-user";
+        st.waitingFor = waitingFor;
+      }
+    });
+    appendJournal(repoDir, id, { kind: "progress", text: `Pausa: espera al usuario — ${waitingFor}` });
+    return text(`Ticket ${id} en pausa. Explicale al usuario qué necesitás y terminá el turno.`);
   }),
 );
 

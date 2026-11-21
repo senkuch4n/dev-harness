@@ -6,7 +6,7 @@ import { loadConfig, type HarnessConfig } from "./config.js";
 import { runSteps, summarize } from "./exec.js";
 import { changedFiles, diffHash, headSha, uncommitted } from "./git.js";
 import { laneRequiresGate } from "./lane-policy.js";
-import { assessRiskFor, LIGHT_LANES } from "./risk.js";
+import { assessRiskFor, LIGHT_LANES, matchesAny } from "./risk.js";
 import { planTests, type SpecsAfectados } from "./test-planner.js";
 import type { GateResult, Lane, RiskAssessment, StepResult, TestPlan } from "./types.js";
 
@@ -22,9 +22,13 @@ export function harnessOwnPrefixes(cfg: HarnessConfig): string[] {
   return [".harness/run/", ".harness/memory/", `${cfg.memory.episodesDir}/${cfg.memory.filePrefix}`, `${cfg.memory.incidentsDir}/${cfg.memory.filePrefix}`, cfg.memory.pendingLessonsDir + "/"];
 }
 
-function ticketFiles(repoDir: string, cfg: HarnessConfig, lane?: Lane): string[] {
-  const own = harnessOwnPrefixes(cfg);
-  return changedFiles(repoDir, baseRev(repoDir, cfg, lane)).filter((f) => !own.some((p) => f.startsWith(p)));
+/** ¿Es un archivo propio del arnés o basura suelta (patches, .DS_Store) que no es parte del ticket? */
+export function isNoise(f: string, cfg: HarnessConfig): boolean {
+  return harnessOwnPrefixes(cfg).some((p) => f.startsWith(p)) || matchesAny(f, cfg.gate.ignoreFiles);
+}
+
+function ticketFiles(repoDir: string, cfg: HarnessConfig, lane?: Lane, override?: string): string[] {
+  return changedFiles(repoDir, baseRev(repoDir, cfg, lane, override)).filter((f) => !isNoise(f, cfg));
 }
 
 function requireTicket(repoDir: string, ticketId: string): TicketState {
@@ -44,10 +48,10 @@ export function changeLane(repoDir: string, s: TicketState, lane: Lane, reason: 
 }
 
 /** Corre el script de análisis de impacto del repo (si hay adaptador). */
-export function runImpact(repoDir: string, cfg: HarnessConfig, lane?: Lane): SpecsAfectados | undefined {
+export function runImpact(repoDir: string, cfg: HarnessConfig, lane?: Lane, override?: string): SpecsAfectados | undefined {
   const t = cfg.adapters.testPlan;
   if (!t) return undefined;
-  const cmd = fill(t.command, { base: baseRev(repoDir, cfg, lane), mergeBase: mergeBase(repoDir, cfg, lane) });
+  const cmd = fill(t.command, { base: baseRev(repoDir, cfg, lane, override), mergeBase: mergeBase(repoDir, cfg, lane, override) });
   const out = execSync(cmd, { cwd: repoDir, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], maxBuffer: 64 * 1024 * 1024, shell: "/bin/bash" });
   const start = out.indexOf("{");
   if (start < 0) throw new Error(`El análisis de impacto no devolvió JSON:\n${out.slice(0, 500)}`);
@@ -57,15 +61,15 @@ export function runImpact(repoDir: string, cfg: HarnessConfig, lane?: Lane): Spe
 export function currentPlan(repoDir: string, ticketId: string): { plan: TestPlan; files: string[]; risk: RiskAssessment; cfg: HarnessConfig } {
   const cfg = loadConfig(repoDir);
   const s = requireTicket(repoDir, ticketId);
-  const files = ticketFiles(repoDir, cfg, s.lane);
-  const risk = assessRiskFor(repoDir, files, s.lane!, cfg);
-  const impact = files.length ? runImpactSafe(repoDir, cfg, s.lane) : undefined;
+  const files = ticketFiles(repoDir, cfg, s.lane, s.baseOverride);
+  const risk = assessRiskFor(repoDir, files, s.lane!, cfg, s.baseOverride);
+  const impact = files.length ? runImpactSafe(repoDir, cfg, s.lane, s.baseOverride) : undefined;
   return { plan: planTests(files, s.lane!, cfg, risk, impact), files, risk, cfg };
 }
 
-function runImpactSafe(repoDir: string, cfg: HarnessConfig, lane?: Lane): SpecsAfectados | undefined {
+function runImpactSafe(repoDir: string, cfg: HarnessConfig, lane?: Lane, override?: string): SpecsAfectados | undefined {
   try {
-    return runImpact(repoDir, cfg, lane);
+    return runImpact(repoDir, cfg, lane, override);
   } catch {
     return undefined;
   }
@@ -91,7 +95,7 @@ export async function runGate(repoDir: string, ticketId: string, summary: Episod
   const cfg = loadConfig(repoDir);
   const s = requireTicket(repoDir, ticketId);
   const max = cfg.gate.maxAttempts;
-  const hash = diffHash(repoDir, baseRev(repoDir, cfg, s.lane), harnessOwnPrefixes(cfg));
+  const hash = hashFor(repoDir, cfg, s.lane, s.baseOverride);
   const base = { maxAttempts: max, diffHash: hash, results: [] as StepResult[] };
   const fail = (message: string, extra: Partial<GateResult> = {}): GateResult => ({ ...base, passed: false, escalated: false, attempt: s.gateAttempts, message, ...extra });
 
@@ -100,18 +104,18 @@ export async function runGate(repoDir: string, ticketId: string, summary: Episod
   }
   if (s.status === "escalated") return fail("El ticket ya fue escalado a un humano. No sigas intentando.", { escalated: true });
 
-  const files = ticketFiles(repoDir, cfg, s.lane);
-  if (files.length === 0) return fail(`No hay cambios respecto de la rama base (${baseRev(repoDir, cfg, s.lane)}).`);
+  const files = ticketFiles(repoDir, cfg, s.lane, s.baseOverride);
+  if (files.length === 0) return fail(`No hay cambios respecto de la rama base (${baseRev(repoDir, cfg, s.lane, s.baseOverride)}).`);
 
   if (cfg.adapters.testPlan && cfg.gate.requireCommitted) {
-    const dirty = uncommitted(repoDir, harnessOwnPrefixes(cfg));
+    const dirty = uncommitted(repoDir).filter((f) => !isNoise(f, cfg));
     if (dirty.length) return fail(`El análisis de impacto del repo mira commits: commiteá el trabajo antes del gate (aunque sea un commit WIP). Sin commitear: ${dirty.slice(0, 10).join(", ")}`);
   }
 
-  const risk = assessRiskFor(repoDir, files, s.lane!, cfg);
+  const risk = assessRiskFor(repoDir, files, s.lane!, cfg, s.baseOverride);
   let impact: SpecsAfectados | undefined;
   try {
-    impact = runImpact(repoDir, cfg, s.lane);
+    impact = runImpact(repoDir, cfg, s.lane, s.baseOverride);
   } catch (e) {
     return fail(`Falló el análisis de impacto del repo: ${(e as Error).message}`);
   }
@@ -197,14 +201,20 @@ export async function runGate(repoDir: string, ticketId: string, summary: Episod
 export function gateStatusForStop(repoDir: string, ticketId: string): { mustBlock: boolean; reason: string; state?: TicketState } {
   const s = loadState(repoDir, ticketId);
   if (!s || !s.lane) return { mustBlock: false, reason: "Ticket sin estado o sin carril." };
+  if (s.status === "waiting-user") return { mustBlock: false, reason: `Esperando al usuario: ${s.waitingFor ?? ""}`, state: s };
   if (!laneRequiresGate(s.lane) || ["escalated", "answered", "closed", "delegated"].includes(s.status)) {
     return { mustBlock: false, reason: `Estado ${s.status}, carril ${s.lane}.`, state: s };
   }
   const cfg = loadConfig(repoDir);
-  const files = ticketFiles(repoDir, cfg, s.lane);
+  const files = ticketFiles(repoDir, cfg, s.lane, s.baseOverride);
   if (files.length === 0) return { mustBlock: false, reason: "Sin cambios.", state: s };
-  const hash = diffHash(repoDir, baseRev(repoDir, cfg, s.lane), harnessOwnPrefixes(cfg));
+  const hash = hashFor(repoDir, cfg, s.lane, s.baseOverride);
   if (s.gatePassed?.diffHash === hash) return { mustBlock: false, reason: "Gate OK para este diff.", state: s };
   const why = s.gatePassed ? "El código cambió después de que pasó el gate." : "Todavía no pasó el gate.";
   return { mustBlock: true, reason: why, state: s };
+}
+
+function hashFor(repoDir: string, cfg: HarnessConfig, lane?: Lane, override?: string): string {
+  const files = ticketFiles(repoDir, cfg, lane, override);
+  return diffHash(repoDir, baseRev(repoDir, cfg, lane, override), [], files);
 }

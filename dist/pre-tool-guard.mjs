@@ -1820,14 +1820,15 @@ function revExists(repoDir, rev) {
     return false;
   }
 }
-function baseRev(repoDir, cfg, lane) {
+function baseRev(repoDir, cfg, lane, override) {
+  if (override && revExists(repoDir, override)) return override;
   const branch = lane && cfg.lanes.base[lane] || cfg.baseBranch;
   const remote = `${cfg.remote}/${branch}`;
   return revExists(repoDir, remote) ? remote : branch;
 }
-function mergeBase(repoDir, cfg, lane) {
+function mergeBase(repoDir, cfg, lane, override) {
   try {
-    return execFileSync("git", ["merge-base", "HEAD", baseRev(repoDir, cfg, lane)], { cwd: repoDir, encoding: "utf8" }).trim();
+    return execFileSync("git", ["merge-base", "HEAD", baseRev(repoDir, cfg, lane, override)], { cwd: repoDir, encoding: "utf8" }).trim();
   } catch {
     return "HEAD";
   }
@@ -21671,8 +21672,10 @@ var HarnessConfigSchema = external_exports.object({
   gate: external_exports.object({
     maxAttempts: external_exports.number().int().positive().default(3),
     /** Con adaptador de test plan, exigir que el trabajo esté commiteado antes del gate. */
-    requireCommitted: external_exports.boolean().default(true)
-  }).default({ maxAttempts: 3, requireCommitted: true }),
+    requireCommitted: external_exports.boolean().default(true),
+    /** Archivos sueltos que nunca cuentan como cambio del ticket (globs). */
+    ignoreFiles: external_exports.array(external_exports.string()).default(["*.patch", "*.diff", "*.orig", "*.rej", "**/.DS_Store", "*.swp", "*.swo", "**/.*.swp", "**/.*.swo"])
+  }).default({ maxAttempts: 3, requireCommitted: true, ignoreFiles: ["*.patch", "*.diff", "*.orig", "*.rej", "**/.DS_Store", "*.swp", "*.swo", "**/.*.swp", "**/.*.swo"] }),
   triage: external_exports.object({ minConfidence: external_exports.number().min(0).max(1).default(0.7) }).default({ minConfidence: 0.7 })
 });
 var CONFIG_RELATIVE_PATH = ".harness/config.json";
@@ -21805,9 +21808,9 @@ ${output2.slice(0, 500)}`);
   const files = output2.split("\n").map((l) => l.match(fileRe)?.[1]).filter((x) => Boolean(x));
   return { level, files };
 }
-function assessRiskFor(repoDir, files, lane, cfg) {
+function assessRiskFor(repoDir, files, lane, cfg, override) {
   if (!cfg.adapters.risk) return assessRisk(files, lane, cfg);
-  const cmd = fill(cfg.adapters.risk.command, { base: mergeBase(repoDir, cfg, lane) });
+  const cmd = fill(cfg.adapters.risk.command, { base: mergeBase(repoDir, cfg, lane, override) });
   let out;
   try {
     out = execSync(cmd, { cwd: repoDir, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], shell: "/bin/bash" });
@@ -21894,7 +21897,8 @@ guard(() => {
   const tool = input2.tool_name ?? "";
   const ti = input2.tool_input ?? {};
   const ticketId = getActiveTicket(repoDir);
-  const lane = ticketId ? loadState(repoDir, ticketId)?.lane : void 0;
+  const st = ticketId ? loadState(repoDir, ticketId) : void 0;
+  const lane = st?.lane;
   if (tool === "Bash") {
     const reason = checkBash(String(ti.command ?? ""), {
       protectedBranches: cfg.protectedBranches,
@@ -21903,8 +21907,8 @@ guard(() => {
     });
     if (reason) block(reason);
     if (cfg.guard.humanOkForHighRiskPush && isPush(String(ti.command ?? ""))) {
-      const files = changedFiles(repoDir, baseRev(repoDir, cfg, lane));
-      const risk = assessRiskFor(repoDir, files, lane ?? "bugfix", cfg);
+      const files = changedFiles(repoDir, baseRev(repoDir, cfg, lane, st?.baseOverride));
+      const risk = assessRiskFor(repoDir, files, lane ?? "bugfix", cfg, st?.baseOverride);
       if (risk.level === "high" && !hasHumanOkForHead(repoDir)) {
         block(
           `Riesgo ALTO (${risk.criticalFiles.slice(0, 5).join(", ") || "ver riesgo"}): no se pushea sin el OK del usuario. Ped\xEDselo explicando qu\xE9 cambia y c\xF3mo se revierte; cuando lo d\xE9, registralo con la tool record_human_ok y reintent\xE1. Integrar en local s\xED est\xE1 permitido.`

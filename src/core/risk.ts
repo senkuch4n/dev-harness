@@ -64,9 +64,9 @@ export function parseRiskOutput(output: string, cfg: HarnessConfig): { level: Ri
 }
 
 /** Riesgo con el script del repo si hay adaptador; si no, con las reglas del arnés. */
-export function assessRiskFor(repoDir: string, files: string[], lane: Lane, cfg: HarnessConfig): RiskAssessment {
+export function assessRiskFor(repoDir: string, files: string[], lane: Lane, cfg: HarnessConfig, override?: string): RiskAssessment {
   if (!cfg.adapters.risk) return assessRisk(files, lane, cfg);
-  const cmd = fill(cfg.adapters.risk.command, { base: mergeBase(repoDir, cfg, lane) });
+  const cmd = fill(cfg.adapters.risk.command, { base: mergeBase(repoDir, cfg, lane, override) });
   let out: string;
   try {
     out = execSync(cmd, { cwd: repoDir, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], shell: "/bin/bash" });

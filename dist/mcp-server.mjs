@@ -38551,8 +38551,10 @@ var HarnessConfigSchema = external_exports.object({
   gate: external_exports.object({
     maxAttempts: external_exports.number().int().positive().default(3),
     /** Con adaptador de test plan, exigir que el trabajo esté commiteado antes del gate. */
-    requireCommitted: external_exports.boolean().default(true)
-  }).default({ maxAttempts: 3, requireCommitted: true }),
+    requireCommitted: external_exports.boolean().default(true),
+    /** Archivos sueltos que nunca cuentan como cambio del ticket (globs). */
+    ignoreFiles: external_exports.array(external_exports.string()).default(["*.patch", "*.diff", "*.orig", "*.rej", "**/.DS_Store", "*.swp", "*.swo", "**/.*.swp", "**/.*.swo"])
+  }).default({ maxAttempts: 3, requireCommitted: true, ignoreFiles: ["*.patch", "*.diff", "*.orig", "*.rej", "**/.DS_Store", "*.swp", "*.swo", "**/.*.swp", "**/.*.swo"] }),
   triage: external_exports.object({ minConfidence: external_exports.number().min(0).max(1).default(0.7) }).default({ minConfidence: 0.7 })
 });
 var CONFIG_RELATIVE_PATH = ".harness/config.json";
@@ -38674,8 +38676,8 @@ function changedFiles(repoDir2, baseRev2) {
   const files = [committed, working, untracked].join("\n").split("\n").map((f) => f.trim()).filter(Boolean).filter((f) => !f.startsWith(".harness/run/"));
   return [...new Set(files)].sort();
 }
-function diffHash(repoDir2, baseRev2, exclude = [".harness/"]) {
-  const files = changedFiles(repoDir2, baseRev2).filter((f) => !exclude.some((p) => f.startsWith(p)));
+function diffHash(repoDir2, baseRev2, exclude = [".harness/"], onlyFiles) {
+  const files = onlyFiles ?? changedFiles(repoDir2, baseRev2).filter((f) => !exclude.some((p) => f.startsWith(p)));
   const mb = git(repoDir2, ["merge-base", "HEAD", baseRev2]) || "HEAD";
   const h = createHash("sha256").update(files.join("\n"));
   h.update(git(repoDir2, ["diff", mb, "--", ...files]));
@@ -38943,14 +38945,15 @@ function revExists(repoDir2, rev) {
     return false;
   }
 }
-function baseRev(repoDir2, cfg, lane) {
+function baseRev(repoDir2, cfg, lane, override) {
+  if (override && revExists(repoDir2, override)) return override;
   const branch = lane && cfg.lanes.base[lane] || cfg.baseBranch;
   const remote = `${cfg.remote}/${branch}`;
   return revExists(repoDir2, remote) ? remote : branch;
 }
-function mergeBase(repoDir2, cfg, lane) {
+function mergeBase(repoDir2, cfg, lane, override) {
   try {
-    return execFileSync2("git", ["merge-base", "HEAD", baseRev(repoDir2, cfg, lane)], { cwd: repoDir2, encoding: "utf8" }).trim();
+    return execFileSync2("git", ["merge-base", "HEAD", baseRev(repoDir2, cfg, lane, override)], { cwd: repoDir2, encoding: "utf8" }).trim();
   } catch {
     return "HEAD";
   }
@@ -39025,9 +39028,9 @@ ${output2.slice(0, 500)}`);
   const files = output2.split("\n").map((l) => l.match(fileRe)?.[1]).filter((x) => Boolean(x));
   return { level, files };
 }
-function assessRiskFor(repoDir2, files, lane, cfg) {
+function assessRiskFor(repoDir2, files, lane, cfg, override) {
   if (!cfg.adapters.risk) return assessRisk(files, lane, cfg);
-  const cmd = fill(cfg.adapters.risk.command, { base: mergeBase(repoDir2, cfg, lane) });
+  const cmd = fill(cfg.adapters.risk.command, { base: mergeBase(repoDir2, cfg, lane, override) });
   let out;
   try {
     out = execSync(cmd, { cwd: repoDir2, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], shell: "/bin/bash" });
@@ -39221,9 +39224,11 @@ function dedupe(steps) {
 function harnessOwnPrefixes(cfg) {
   return [".harness/run/", ".harness/memory/", `${cfg.memory.episodesDir}/${cfg.memory.filePrefix}`, `${cfg.memory.incidentsDir}/${cfg.memory.filePrefix}`, cfg.memory.pendingLessonsDir + "/"];
 }
-function ticketFiles(repoDir2, cfg, lane) {
-  const own2 = harnessOwnPrefixes(cfg);
-  return changedFiles(repoDir2, baseRev(repoDir2, cfg, lane)).filter((f) => !own2.some((p) => f.startsWith(p)));
+function isNoise(f, cfg) {
+  return harnessOwnPrefixes(cfg).some((p) => f.startsWith(p)) || matchesAny(f, cfg.gate.ignoreFiles);
+}
+function ticketFiles(repoDir2, cfg, lane, override) {
+  return changedFiles(repoDir2, baseRev(repoDir2, cfg, lane, override)).filter((f) => !isNoise(f, cfg));
 }
 function requireTicket(repoDir2, ticketId) {
   const s = loadState(repoDir2, ticketId);
@@ -39239,10 +39244,10 @@ function changeLane(repoDir2, s, lane, reason, cfg) {
   saveState(repoDir2, s);
   appendJournal(repoDir2, s.ticketId, { kind: "escalation", text: `Carril \u2192 ${lane}: ${reason}` });
 }
-function runImpact(repoDir2, cfg, lane) {
+function runImpact(repoDir2, cfg, lane, override) {
   const t = cfg.adapters.testPlan;
   if (!t) return void 0;
-  const cmd = fill(t.command, { base: baseRev(repoDir2, cfg, lane), mergeBase: mergeBase(repoDir2, cfg, lane) });
+  const cmd = fill(t.command, { base: baseRev(repoDir2, cfg, lane, override), mergeBase: mergeBase(repoDir2, cfg, lane, override) });
   const out = execSync2(cmd, { cwd: repoDir2, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], maxBuffer: 64 * 1024 * 1024, shell: "/bin/bash" });
   const start = out.indexOf("{");
   if (start < 0) throw new Error(`El an\xE1lisis de impacto no devolvi\xF3 JSON:
@@ -39252,14 +39257,14 @@ ${out.slice(0, 500)}`);
 function currentPlan(repoDir2, ticketId) {
   const cfg = loadConfig(repoDir2);
   const s = requireTicket(repoDir2, ticketId);
-  const files = ticketFiles(repoDir2, cfg, s.lane);
-  const risk = assessRiskFor(repoDir2, files, s.lane, cfg);
-  const impact = files.length ? runImpactSafe(repoDir2, cfg, s.lane) : void 0;
+  const files = ticketFiles(repoDir2, cfg, s.lane, s.baseOverride);
+  const risk = assessRiskFor(repoDir2, files, s.lane, cfg, s.baseOverride);
+  const impact = files.length ? runImpactSafe(repoDir2, cfg, s.lane, s.baseOverride) : void 0;
   return { plan: planTests(files, s.lane, cfg, risk, impact), files, risk, cfg };
 }
-function runImpactSafe(repoDir2, cfg, lane) {
+function runImpactSafe(repoDir2, cfg, lane, override) {
   try {
-    return runImpact(repoDir2, cfg, lane);
+    return runImpact(repoDir2, cfg, lane, override);
   } catch {
     return void 0;
   }
@@ -39275,23 +39280,23 @@ async function runGate(repoDir2, ticketId, summary) {
   const cfg = loadConfig(repoDir2);
   const s = requireTicket(repoDir2, ticketId);
   const max = cfg.gate.maxAttempts;
-  const hash2 = diffHash(repoDir2, baseRev(repoDir2, cfg, s.lane), harnessOwnPrefixes(cfg));
+  const hash2 = hashFor(repoDir2, cfg, s.lane, s.baseOverride);
   const base2 = { maxAttempts: max, diffHash: hash2, results: [] };
   const fail = (message, extra = {}) => ({ ...base2, passed: false, escalated: false, attempt: s.gateAttempts, message, ...extra });
   if (!laneRequiresGate(s.lane) || s.status === "delegated") {
     return { ...base2, passed: true, escalated: false, attempt: s.gateAttempts, message: `El carril ${s.lane} no pasa por este gate.` };
   }
   if (s.status === "escalated") return fail("El ticket ya fue escalado a un humano. No sigas intentando.", { escalated: true });
-  const files = ticketFiles(repoDir2, cfg, s.lane);
-  if (files.length === 0) return fail(`No hay cambios respecto de la rama base (${baseRev(repoDir2, cfg, s.lane)}).`);
+  const files = ticketFiles(repoDir2, cfg, s.lane, s.baseOverride);
+  if (files.length === 0) return fail(`No hay cambios respecto de la rama base (${baseRev(repoDir2, cfg, s.lane, s.baseOverride)}).`);
   if (cfg.adapters.testPlan && cfg.gate.requireCommitted) {
-    const dirty = uncommitted(repoDir2, harnessOwnPrefixes(cfg));
+    const dirty = uncommitted(repoDir2).filter((f) => !isNoise(f, cfg));
     if (dirty.length) return fail(`El an\xE1lisis de impacto del repo mira commits: commite\xE1 el trabajo antes del gate (aunque sea un commit WIP). Sin commitear: ${dirty.slice(0, 10).join(", ")}`);
   }
-  const risk = assessRiskFor(repoDir2, files, s.lane, cfg);
+  const risk = assessRiskFor(repoDir2, files, s.lane, cfg, s.baseOverride);
   let impact;
   try {
-    impact = runImpact(repoDir2, cfg, s.lane);
+    impact = runImpact(repoDir2, cfg, s.lane, s.baseOverride);
   } catch (e) {
     return fail(`Fall\xF3 el an\xE1lisis de impacto del repo: ${e.message}`);
   }
@@ -39372,6 +39377,10 @@ ${report}` };
 
 ${report}` };
 }
+function hashFor(repoDir2, cfg, lane, override) {
+  const files = ticketFiles(repoDir2, cfg, lane, override);
+  return diffHash(repoDir2, baseRev(repoDir2, cfg, lane, override), [], files);
+}
 
 // src/core/human-ok.ts
 import { existsSync as existsSync4, mkdirSync as mkdirSync3, readFileSync as readFileSync5, writeFileSync as writeFileSync3 } from "node:fs";
@@ -39391,7 +39400,7 @@ function writeHumanOk(repoDir2, approvedBy, quote) {
 
 // src/mcp/server.ts
 var repoDir = process.env.DEV_HARNESS_REPO || process.cwd();
-var server = new McpServer({ name: "harness", version: "0.2.0" });
+var server = new McpServer({ name: "harness", version: "0.2.1" });
 function text(t, isError = false) {
   return { content: [{ type: "text", text: t }], ...isError ? { isError: true } : {} };
 }
@@ -39402,6 +39411,9 @@ function ticketOrActive(id) {
   const t = id || getActiveTicket(repoDir);
   if (!t) throw new Error("No hay ticket activo en este worktree. Llam\xE1 a start_ticket.");
   return t;
+}
+function resume(id) {
+  if (loadState(repoDir, id)?.status === "waiting-user") updateState(repoDir, id, (st) => st.status = "open");
 }
 function safe(fn) {
   return async (args) => {
@@ -39422,17 +39434,33 @@ server.registerTool(
       ticketId: external_exports.string().describe("Ej: LIN-123 o GH-45"),
       title: external_exports.string(),
       body: external_exports.string().default("").describe("Descripci\xF3n del ticket, para buscar tickets parecidos"),
-      source: external_exports.string().optional().describe("linear | github | manual")
+      source: external_exports.string().optional().describe("linear | github | gitlab | manual"),
+      baseBranch: external_exports.string().optional().describe("SOLO si el usuario lo pide: rama base para este ticket (p. ej. cuando el arn\xE9s todav\xEDa no est\xE1 integrado en la base habitual).")
     }
   },
-  safe(({ ticketId, title, body, source }) => {
+  safe(({ ticketId, title, body, source, baseBranch }) => {
     const cfg = loadConfig(repoDir);
-    const s = createState(repoDir, ticketId, title, source);
+    createState(repoDir, ticketId, title, source);
+    let reopened = false;
+    const s = updateState(repoDir, ticketId, (st) => {
+      if (baseBranch) st.baseOverride = baseBranch;
+      if (st.status === "waiting-user") st.status = "open";
+      if (st.status === "escalated") {
+        st.status = "open";
+        st.gateAttempts = 0;
+        st.stopBlocks = 0;
+        reopened = true;
+      }
+    });
+    if (reopened) appendJournal(repoDir, ticketId, { kind: "decision", text: "Reabierto por el usuario (estaba escalado): intentos del gate en 0." });
+    if (baseBranch) appendJournal(repoDir, ticketId, { kind: "decision", text: `Base del ticket: ${baseBranch} (pedido del usuario)` });
     setActiveTicket(repoDir, ticketId);
     const similar = searchMemory(repoDir, `${title} ${body}`, { limit: 5, cfg, existingFiles: (f) => existsSync5(join6(repoDir, f)) });
     return json2({
       ticket: { id: s.ticketId, status: s.status, lane: s.lane ?? null, gateAttempts: s.gateAttempts },
       resumed: s.laneHistory.length > 0,
+      reopened,
+      base: s.baseOverride ?? null,
       agents: agentMap(cfg),
       delegatedLanes: cfg.lanes.delegate,
       similarPastTickets: similar,
@@ -39518,8 +39546,8 @@ server.registerTool(
     const id = ticketOrActive(ticketId);
     const cfg = loadConfig(repoDir);
     const s = loadState(repoDir, id);
-    const files = changedFiles(repoDir, baseRev(repoDir, cfg, s?.lane));
-    return json2({ lane: s?.lane, files, risk: assessRiskFor(repoDir, files, s?.lane ?? "bugfix", cfg) });
+    const files = changedFiles(repoDir, baseRev(repoDir, cfg, s?.lane, s?.baseOverride)).filter((f) => !isNoise(f, cfg));
+    return json2({ lane: s?.lane, base: baseRev(repoDir, cfg, s?.lane, s?.baseOverride), files, risk: assessRiskFor(repoDir, files, s?.lane ?? "bugfix", cfg, s?.baseOverride) });
   })
 );
 server.registerTool(
@@ -39540,7 +39568,9 @@ server.registerTool(
     inputSchema: optionalTicket
   },
   safe(async ({ ticketId }) => {
-    const r = await runInner(repoDir, ticketOrActive(ticketId));
+    const id = ticketOrActive(ticketId);
+    resume(id);
+    const r = await runInner(repoDir, id);
     return text(`${r.ok ? "OK" : "FALL\xD3"}
 
 ${r.report}`, !r.ok);
@@ -39559,7 +39589,9 @@ server.registerTool(
     }
   },
   safe(async ({ ticketId, ...summary }) => {
-    const g = await runGate(repoDir, ticketOrActive(ticketId), summary);
+    const id = ticketOrActive(ticketId);
+    resume(id);
+    const g = await runGate(repoDir, id, summary);
     return text(g.message, !g.passed);
   })
 );
@@ -39626,6 +39658,24 @@ server.registerTool(
   safe(({ ticketId, ...lesson }) => {
     const file2 = proposeLesson(repoDir, { ...lesson, ticketId: ticketId || getActiveTicket(repoDir) }, loadConfig(repoDir));
     return text(`Lecci\xF3n pendiente en ${file2.replace(repoDir + "/", "")}. Incluila en el PR para que la revise un humano.`);
+  })
+);
+server.registerTool(
+  "pause_ticket",
+  {
+    description: "Pausa el ticket porque necesit\xE1s algo del USUARIO (una respuesta, una decisi\xF3n, una acci\xF3n en su m\xE1quina). Te deja terminar el turno sin pasar el gate y sin cerrar el ticket. Se reanuda solo al volver a llamar start_ticket, run_checks o run_gate.",
+    inputSchema: { ...optionalTicket, waitingFor: external_exports.string().describe("Qu\xE9 necesit\xE1s del usuario, concreto") }
+  },
+  safe(({ ticketId, waitingFor }) => {
+    const id = ticketOrActive(ticketId);
+    updateState(repoDir, id, (st) => {
+      if (st.status === "open" || st.status === "gate-passed") {
+        st.status = "waiting-user";
+        st.waitingFor = waitingFor;
+      }
+    });
+    appendJournal(repoDir, id, { kind: "progress", text: `Pausa: espera al usuario \u2014 ${waitingFor}` });
+    return text(`Ticket ${id} en pausa. Explicale al usuario qu\xE9 necesit\xE1s y termin\xE1 el turno.`);
   })
 );
 server.registerTool(

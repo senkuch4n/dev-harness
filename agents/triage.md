@@ -22,6 +22,7 @@ Recibís: el ticket (título, cuerpo, comentarios) y los tickets parecidos que d
 ```
 
 Criterios:
+- **type**: un cambio de texto, estilo, color, espaciado o layout que ve el usuario es `feature` (con risk `low` si no toca lógica), **no** `chore`. `chore` es mantenimiento sin efecto visible: dependencias, configuración, refactors internos, limpieza. `docs` es solo documentación.
 - **risk low**: cambios visuales o de texto que no tocan reglas de negocio, auth, pagos, datos ni infraestructura.
 - **risk high**: auth, permisos, pagos, migraciones de Postgres, caché de Redis, Docker o nginx, o cambios en varios módulos.
 - **urgency critical**: producción caída, pérdida o corrupción de datos, un flujo principal bloqueado para muchos usuarios, o un problema de seguridad.

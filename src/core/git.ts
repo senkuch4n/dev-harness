@@ -30,8 +30,8 @@ export function changedFiles(repoDir: string, baseRev: string): string[] {
  * Hash del CONTENIDO del cambio (vs merge-base), no del commit: commitear o
  * amendar no lo invalida; editar código sí. Si cambia, el gate anterior ya no vale.
  */
-export function diffHash(repoDir: string, baseRev: string, exclude: string[] = [".harness/"]): string {
-  const files = changedFiles(repoDir, baseRev).filter((f) => !exclude.some((p) => f.startsWith(p)));
+export function diffHash(repoDir: string, baseRev: string, exclude: string[] = [".harness/"], onlyFiles?: string[]): string {
+  const files = onlyFiles ?? changedFiles(repoDir, baseRev).filter((f) => !exclude.some((p) => f.startsWith(p)));
   const mb = git(repoDir, ["merge-base", "HEAD", baseRev]) || "HEAD";
   const h = createHash("sha256").update(files.join("\n"));
   h.update(git(repoDir, ["diff", mb, "--", ...files]));

@@ -156,8 +156,10 @@ export const HarnessConfigSchema = z.object({
       maxAttempts: z.number().int().positive().default(3),
       /** Con adaptador de test plan, exigir que el trabajo esté commiteado antes del gate. */
       requireCommitted: z.boolean().default(true),
+      /** Archivos sueltos que nunca cuentan como cambio del ticket (globs). */
+      ignoreFiles: z.array(z.string()).default(["*.patch", "*.diff", "*.orig", "*.rej", "**/.DS_Store", "*.swp", "*.swo", "**/.*.swp", "**/.*.swo"]),
     })
-    .default({ maxAttempts: 3, requireCommitted: true }),
+    .default({ maxAttempts: 3, requireCommitted: true, ignoreFiles: ["*.patch", "*.diff", "*.orig", "*.rej", "**/.DS_Store", "*.swp", "*.swo", "**/.*.swp", "**/.*.swo"] }),
   triage: z.object({ minConfidence: z.number().min(0).max(1).default(0.7) }).default({ minConfidence: 0.7 }),
 });
 
