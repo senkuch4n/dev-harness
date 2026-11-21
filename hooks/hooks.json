@@ -1,0 +1,20 @@
+{
+  "description": "dev-harness: guardas de seguridad (PreToolUse) y gate obligatorio antes de terminar (Stop)",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/dist/pre-tool-guard.mjs\"", "timeout": 15 }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/dist/stop-gate.mjs\"", "timeout": 30 }
+        ]
+      }
+    ]
+  }
+}

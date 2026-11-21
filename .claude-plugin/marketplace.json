@@ -1,0 +1,11 @@
+{
+  "name": "senkuch4n",
+  "owner": { "name": "Joel", "url": "https://github.com/senkuch4n" },
+  "plugins": [
+    {
+      "name": "dev-harness",
+      "source": "./",
+      "description": "Arnés agéntico para desarrollo y mantenimiento de sistemas."
+    }
+  ]
+}

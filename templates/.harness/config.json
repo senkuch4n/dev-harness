@@ -1,0 +1,95 @@
+{
+  "baseBranch": "main",
+  "protectedBranches": ["main", "master", "develop", "production"],
+
+  "criticalPaths": [
+    "apps/api/src/auth/**",
+    "apps/api/src/**/*.guard.ts",
+    "apps/api/src/**/payments/**",
+    "apps/api/src/main.ts",
+    "apps/api/src/**/migrations/**",
+    "apps/api/prisma/**",
+    "apps/web/middleware.ts",
+    "**/Dockerfile*",
+    "docker-compose*.yml",
+    "nginx/**",
+    ".github/workflows/**",
+    "**/.env*"
+  ],
+
+  "sharedPaths": [
+    "packages/**",
+    "apps/api/src/common/**",
+    "apps/api/src/config/**",
+    "apps/web/lib/**",
+    "apps/web/components/ui/**"
+  ],
+
+  "testImpact": {
+    "apps/api/src/auth/**": ["auth"],
+    "apps/web/app/(auth)/**": ["auth"],
+    "apps/api/src/users/**": ["users"],
+    "apps/web/app/(dashboard)/users/**": ["users"],
+    "apps/api/src/**/redis/**": ["smoke"],
+    "apps/web/app/layout.tsx": ["smoke", "visual"],
+    "apps/web/styles/**": ["visual"],
+    "apps/web/components/**": ["visual"]
+  },
+  "criticalFlows": ["auth", "smoke"],
+  "e2eTagFormat": "@{flow}",
+
+  "commands": {
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npx tsc -p apps/api/tsconfig.json --noEmit && npx tsc -p apps/web/tsconfig.json --noEmit",
+    "unit": [
+      {
+        "paths": ["apps/api/src/**"],
+        "cwd": "apps/api",
+        "command": "npx jest --findRelatedTests {files} --passWithNoTests"
+      },
+      {
+        "paths": ["apps/web/**"],
+        "cwd": "apps/web",
+        "command": "npx jest --findRelatedTests {files} --passWithNoTests"
+      }
+    ],
+    "integration": [
+      {
+        "paths": ["apps/api/src/**"],
+        "cwd": "apps/api",
+        "command": "npx jest --config test/jest-e2e.json --findRelatedTests {files} --passWithNoTests"
+      }
+    ],
+    "e2e": "npx playwright test --grep {grep}",
+    "visual": "npx playwright test --grep @visual",
+    "screenshot": "npx playwright screenshot --full-page {url} {out}",
+    "servicesUp": "docker compose -f docker-compose.test.yml up -d --wait postgres redis"
+  },
+
+  "budgets": {
+    "hotfix": { "gateMinutes": 15 },
+    "bugfix": { "gateMinutes": 25 },
+    "fast-feature": { "gateMinutes": 10 },
+    "full-feature": { "gateMinutes": 45 },
+    "chore": { "gateMinutes": 10 }
+  },
+
+  "guard": {
+    "forbiddenCommands": [
+      { "pattern": "playwright test\\s*$", "reason": "Suite e2e completa: corre en el nightly. Usá run_checks o run_gate, que corren solo lo afectado." },
+      { "pattern": "playwright test\\s+--project\\S*\\s*\\S*\\s*$", "reason": "Suite e2e completa de un proyecto: usá run_gate." },
+      { "pattern": "docker[ -]compose\\b.*\\bdown\\b.*(\\s-v\\b|--volumes)", "reason": "Borra los volúmenes (datos de Postgres/Redis)." },
+      { "pattern": "docker\\s+(system|volume)\\s+prune", "reason": "Borra volúmenes e imágenes de Docker." },
+      { "pattern": "(?i)\\bdrop\\s+(database|schema|table)\\b", "reason": "Operación destructiva sobre Postgres: la hace un humano." },
+      { "pattern": "(?i)\\btruncate\\s+table\\b", "reason": "Operación destructiva sobre Postgres: la hace un humano." },
+      { "pattern": "prisma\\s+migrate\\s+reset|typeorm\\b.*schema:drop|migration:revert", "reason": "Resetear o revertir migraciones lo decide un humano." },
+      { "pattern": "(?i)redis-cli\\b.*\\bflush(all|db)\\b", "reason": "Vacía Redis." },
+      { "pattern": "nginx\\s+-s\\s+(stop|quit)|systemctl\\s+(stop|restart|reload)\\s+nginx", "reason": "No se toca nginx de un entorno real desde el agente." },
+      { "pattern": "rm\\s+-[a-zA-Z]*r[a-zA-Z]*f?\\s+(/|~|\\.)\\s*$", "reason": "Borrado recursivo peligroso." }
+    ]
+  },
+
+  "gate": { "maxAttempts": 3 },
+  "triage": { "minConfidence": 0.7 }
+}
