@@ -199,7 +199,9 @@ function planFromImpact(files: string[], lane: Lane, cfg: HarnessConfig, impact:
     }
   }
   if (impact.suiteCompleta) {
-    pending.push(`SUITE COMPLETA RECOMENDADA: ${impact.motivosSuiteCompleta.join("; ")}`);
+    pending.push(
+      `SUITE COMPLETA RECOMENDADA (cambio global: ${impact.motivosSuiteCompleta.slice(0, 3).join("; ")}): no la corre el gate; va a la corrida completa del lote / revisión.`,
+    );
   }
 
   let inner: TestStep[] = [];

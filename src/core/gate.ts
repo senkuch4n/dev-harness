@@ -6,7 +6,7 @@ import { loadConfig, type HarnessConfig } from "./config.js";
 import { runSteps, summarize } from "./exec.js";
 import { changedFiles, diffHash, headSha, uncommitted } from "./git.js";
 import { laneRequiresGate } from "./lane-policy.js";
-import { assessRiskFor, LIGHT_LANES, matchesAny } from "./risk.js";
+import { assessRiskFor, matchesAny } from "./risk.js";
 import { planTests, type SpecsAfectados } from "./test-planner.js";
 import type { GateResult, Lane, RiskAssessment, StepResult, TestPlan } from "./types.js";
 
@@ -120,17 +120,15 @@ export async function runGate(repoDir: string, ticketId: string, summary: Episod
     return fail(`Falló el análisis de impacto del repo: ${(e as Error).message}`);
   }
 
-  const globalChange = Boolean(impact?.suiteCompleta) && LIGHT_LANES.includes(s.lane!);
-  if (risk.mustEscalate || globalChange) {
-    const reason = risk.mustEscalate
-      ? risk.reason
-      : `El carril "${s.lane}" tocó algo global (${impact!.motivosSuiteCompleta.slice(0, 3).join("; ")}): no es un cambio de riesgo bajo.`;
-    changeLane(repoDir, s, "full-feature", reason, cfg);
+  // Solo el RIESGO re-carrila. Que el cambio sea global (p. ej. un componente del layout) dice
+  // cuántos tests correr, no cuánto proceso necesita: eso queda como "suite completa en el lote".
+  if (risk.mustEscalate) {
+    changeLane(repoDir, s, "full-feature", risk.reason, cfg);
     const delegated = cfg.lanes.delegate["full-feature"];
     return fail(
       delegated
-        ? `RE-CARRIL: ${reason}\nEl ticket pasa al flujo "${delegated}" del repo (ver CLAUDE.md/AGENTS.md). Este gate ya no aplica.`
-        : `RE-CARRIL: ${reason}\nSeguí la skill lane-full-feature desde el paso de spec (necesita aprobación humana) antes de volver a correr el gate.`,
+        ? `RE-CARRIL: ${risk.reason}\nEl ticket pasa al flujo "${delegated}" del repo (ver CLAUDE.md/AGENTS.md). Este gate ya no aplica.`
+        : `RE-CARRIL: ${risk.reason}\nSeguí la skill lane-full-feature desde el paso de spec (necesita aprobación humana) antes de volver a correr el gate.`,
     );
   }
 

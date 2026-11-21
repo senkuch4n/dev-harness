@@ -123,13 +123,15 @@ describe("gate en modo adaptador (Evidentia)", () => {
     expect(gateStatusForStop(repo, "#10").mustBlock).toBe(false);
   });
 
-  it("cambio global (suite completa) en carril rápido también re-carrila", async () => {
+  it("cambio global (suite completa) en carril rápido NO re-carrila: queda la suite para el lote", async () => {
     makeRepo("medio", true);
     ticket();
     writeFileSync(join(repo, "client/components/Boton.tsx"), "export const a = 5;\n");
     commit("wip");
     const g = await runGate(repo, "#10", summary);
-    expect(g.message).toMatch(/algo global/);
+    expect(g.passed).toBe(true);
+    expect(g.message).toMatch(/SUITE COMPLETA RECOMENDADA/);
+    expect(loadState(repo, "#10")!.lane).toBe("fast-feature");
   });
 
   it("hotfix compara contra main, no contra develop", async () => {

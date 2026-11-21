@@ -33,7 +33,7 @@ import {
 
 const repoDir = process.env.DEV_HARNESS_REPO || process.cwd();
 
-const server = new McpServer({ name: "harness", version: "0.2.1" });
+const server = new McpServer({ name: "harness", version: "0.2.2" });
 
 type Content = { content: { type: "text"; text: string }[]; isError?: boolean };
 
@@ -95,14 +95,14 @@ server.registerTool(
       if (baseBranch) st.baseOverride = baseBranch;
       if (st.status === "waiting-user") st.status = "open";
       // Volver a pedir el ticket es una decisión del usuario: un escalado se reabre con contadores nuevos.
-      if (st.status === "escalated") {
+      if (st.status === "escalated" || st.status === "delegated") {
         st.status = "open";
         st.gateAttempts = 0;
         st.stopBlocks = 0;
         reopened = true;
       }
     });
-    if (reopened) appendJournal(repoDir, ticketId, { kind: "decision", text: "Reabierto por el usuario (estaba escalado): intentos del gate en 0." });
+    if (reopened) appendJournal(repoDir, ticketId, { kind: "decision", text: "Reabierto por el usuario: intentos del gate en 0. Volvé a clasificarlo (triage + select_lane)." });
     if (baseBranch) appendJournal(repoDir, ticketId, { kind: "decision", text: `Base del ticket: ${baseBranch} (pedido del usuario)` });
     setActiveTicket(repoDir, ticketId);
     const similar = searchMemory(repoDir, `${title} ${body}`, { limit: 5, cfg, existingFiles: (f) => existsSync(join(repoDir, f)) });
@@ -149,6 +149,10 @@ server.registerTool(
       if (delegatedTo) {
         st.status = "delegated";
         st.delegatedTo = delegatedTo;
+      } else {
+        st.status = "open";
+        st.delegatedTo = undefined;
+        st.gatePassed = undefined;
       }
     });
     appendJournal(repoDir, id, { kind: "decision", text: `Carril ${lane}: ${reason}${delegatedTo ? ` → flujo del repo: ${delegatedTo}` : ""}` });

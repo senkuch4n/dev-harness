@@ -1,7 +1,7 @@
 {
   "name": "dev-harness",
   "displayName": "Dev Harness",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Arnés agéntico para desarrollo y mantenimiento: triage por tipo/riesgo/urgencia, carriles con patrones distintos, gate determinístico de tests y memoria de tickets.",
   "author": {
     "name": "Joel",

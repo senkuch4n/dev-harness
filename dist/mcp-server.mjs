@@ -39176,7 +39176,9 @@ function planFromImpact(files, lane, cfg, impact, risk) {
     }
   }
   if (impact.suiteCompleta) {
-    pending.push(`SUITE COMPLETA RECOMENDADA: ${impact.motivosSuiteCompleta.join("; ")}`);
+    pending.push(
+      `SUITE COMPLETA RECOMENDADA (cambio global: ${impact.motivosSuiteCompleta.slice(0, 3).join("; ")}): no la corre el gate; va a la corrida completa del lote / revisi\xF3n.`
+    );
   }
   let inner = [];
   let gate = [];
@@ -39300,14 +39302,12 @@ async function runGate(repoDir2, ticketId, summary) {
   } catch (e) {
     return fail(`Fall\xF3 el an\xE1lisis de impacto del repo: ${e.message}`);
   }
-  const globalChange = Boolean(impact?.suiteCompleta) && LIGHT_LANES.includes(s.lane);
-  if (risk.mustEscalate || globalChange) {
-    const reason = risk.mustEscalate ? risk.reason : `El carril "${s.lane}" toc\xF3 algo global (${impact.motivosSuiteCompleta.slice(0, 3).join("; ")}): no es un cambio de riesgo bajo.`;
-    changeLane(repoDir2, s, "full-feature", reason, cfg);
+  if (risk.mustEscalate) {
+    changeLane(repoDir2, s, "full-feature", risk.reason, cfg);
     const delegated = cfg.lanes.delegate["full-feature"];
     return fail(
-      delegated ? `RE-CARRIL: ${reason}
-El ticket pasa al flujo "${delegated}" del repo (ver CLAUDE.md/AGENTS.md). Este gate ya no aplica.` : `RE-CARRIL: ${reason}
+      delegated ? `RE-CARRIL: ${risk.reason}
+El ticket pasa al flujo "${delegated}" del repo (ver CLAUDE.md/AGENTS.md). Este gate ya no aplica.` : `RE-CARRIL: ${risk.reason}
 Segu\xED la skill lane-full-feature desde el paso de spec (necesita aprobaci\xF3n humana) antes de volver a correr el gate.`
     );
   }
@@ -39400,7 +39400,7 @@ function writeHumanOk(repoDir2, approvedBy, quote) {
 
 // src/mcp/server.ts
 var repoDir = process.env.DEV_HARNESS_REPO || process.cwd();
-var server = new McpServer({ name: "harness", version: "0.2.1" });
+var server = new McpServer({ name: "harness", version: "0.2.2" });
 function text(t, isError = false) {
   return { content: [{ type: "text", text: t }], ...isError ? { isError: true } : {} };
 }
@@ -39445,14 +39445,14 @@ server.registerTool(
     const s = updateState(repoDir, ticketId, (st) => {
       if (baseBranch) st.baseOverride = baseBranch;
       if (st.status === "waiting-user") st.status = "open";
-      if (st.status === "escalated") {
+      if (st.status === "escalated" || st.status === "delegated") {
         st.status = "open";
         st.gateAttempts = 0;
         st.stopBlocks = 0;
         reopened = true;
       }
     });
-    if (reopened) appendJournal(repoDir, ticketId, { kind: "decision", text: "Reabierto por el usuario (estaba escalado): intentos del gate en 0." });
+    if (reopened) appendJournal(repoDir, ticketId, { kind: "decision", text: "Reabierto por el usuario: intentos del gate en 0. Volv\xE9 a clasificarlo (triage + select_lane)." });
     if (baseBranch) appendJournal(repoDir, ticketId, { kind: "decision", text: `Base del ticket: ${baseBranch} (pedido del usuario)` });
     setActiveTicket(repoDir, ticketId);
     const similar = searchMemory(repoDir, `${title} ${body}`, { limit: 5, cfg, existingFiles: (f) => existsSync5(join6(repoDir, f)) });
@@ -39494,6 +39494,10 @@ server.registerTool(
       if (delegatedTo) {
         st.status = "delegated";
         st.delegatedTo = delegatedTo;
+      } else {
+        st.status = "open";
+        st.delegatedTo = void 0;
+        st.gatePassed = void 0;
       }
     });
     appendJournal(repoDir, id, { kind: "decision", text: `Carril ${lane}: ${reason}${delegatedTo ? ` \u2192 flujo del repo: ${delegatedTo}` : ""}` });
