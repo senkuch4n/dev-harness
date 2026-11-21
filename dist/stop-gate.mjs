@@ -19731,49 +19731,118 @@ function date4(params) {
 var ScopedCommand = external_exports.object({
   /** Globs de archivos a los que aplica este comando. */
   paths: external_exports.array(external_exports.string()),
-  /** Comando. Placeholders: {files} (archivos afectados, relativos a cwd), {grep}. */
+  /** Comando. Placeholders: {files} (archivos afectados, relativos a cwd), {base}. */
   command: external_exports.string(),
   /** Directorio desde donde correr el comando (relativo a la raíz). */
   cwd: external_exports.string().default("."),
   /** Si es true, {files} se reescribe relativo a `cwd`. */
   relativeFiles: external_exports.boolean().default(true)
 });
+var CommandOrScoped = external_exports.union([external_exports.string(), external_exports.array(ScopedCommand)]);
 var LaneBudget = external_exports.object({ gateMinutes: external_exports.number().positive() });
+var LaneName = external_exports.enum(["hotfix", "bugfix", "fast-feature", "full-feature", "query", "chore", "human-triage"]);
 var HarnessConfigSchema = external_exports.object({
   baseBranch: external_exports.string().default("main"),
+  /** Remoto contra el que se compara (`<remote>/<baseBranch>`). */
+  remote: external_exports.string().default("origin"),
   protectedBranches: external_exports.array(external_exports.string()).default(["main", "master"]),
-  /** Rutas donde un cambio sube el riesgo (auth, pagos, migraciones, infra). */
+  /** Rutas donde un cambio sube el riesgo (auth, pagos, migraciones, infra). Modo autónomo. */
   criticalPaths: external_exports.array(external_exports.string()).default([]),
-  /** Código compartido: un cambio acá puede afectar todo. */
+  /** Código compartido: un cambio acá puede afectar todo. Modo autónomo. */
   sharedPaths: external_exports.array(external_exports.string()).default([]),
-  /** Test impact analysis: glob -> flujos e2e que lo cubren. */
+  /** Test impact analysis: glob -> flujos e2e que lo cubren. Modo autónomo. */
   testImpact: external_exports.record(external_exports.string(), external_exports.array(external_exports.string())).default({}),
   /** Flujos que siempre se protegen (smoke de hotfix, cambios en código compartido). */
   criticalFlows: external_exports.array(external_exports.string()).default([]),
   /** Cómo se transforma un flujo en el filtro del runner e2e. Ej: "@{flow}". */
   e2eTagFormat: external_exports.string().default("@{flow}"),
   commands: external_exports.object({
-    build: external_exports.string().optional(),
-    lint: external_exports.string().optional(),
-    typecheck: external_exports.string().optional(),
+    build: CommandOrScoped.optional(),
+    lint: CommandOrScoped.optional(),
+    typecheck: CommandOrScoped.optional(),
     unit: external_exports.array(ScopedCommand).default([]),
     integration: external_exports.array(ScopedCommand).default([]),
-    /** Corre e2e filtrados. Placeholder {grep} = tags unidos con "|". */
+    /** Corre e2e filtrados por tag. Placeholder {grep} = tags unidos con "|". */
     e2e: external_exports.string().optional(),
+    /** Corre una lista de specs e2e. Placeholder {specs}. Si falta, los specs quedan para el revisor. */
+    e2eSpecs: external_exports.string().optional(),
     visual: external_exports.string().optional(),
     /** Screenshot de una URL. Placeholders: {url} {out}. */
     screenshot: external_exports.string().optional(),
     /** Comando para servicios que necesitan los tests (Postgres, Redis...). */
     servicesUp: external_exports.string().optional()
   }),
+  /** Usar los scripts que el repo ya tiene en vez de las reglas del arnés. */
+  adapters: external_exports.object({
+    risk: external_exports.object({
+      /** Ej: "./ops/harness/riesgo.sh {base}". Debe imprimir el nivel. */
+      command: external_exports.string(),
+      levelRegex: external_exports.string().default("RIESGO:\\s*(\\w+)"),
+      /** Líneas con archivos que justifican el nivel. Grupo 1 = ruta. */
+      fileRegex: external_exports.string().default("^\\s+(\\S+)\\s+\\("),
+      levels: external_exports.record(external_exports.string(), external_exports.enum(["low", "medium", "high"])).default({
+        bajo: "low",
+        medio: "medium",
+        alto: "high",
+        low: "low",
+        medium: "medium",
+        high: "high"
+      })
+    }).optional(),
+    testPlan: external_exports.object({
+      /** Ej: "node ops/harness/specs-afectados.mjs {base} --hasta HEAD --json". Requiere el trabajo commiteado. */
+      command: external_exports.string(),
+      format: external_exports.literal("specs-afectados").default("specs-afectados"),
+      /** Placeholder {patterns}. */
+      jest: external_exports.string().optional(),
+      /** Placeholder {files}. */
+      nodeTestClient: external_exports.string().optional(),
+      /** Placeholder {files}. */
+      nodeTestHarness: external_exports.string().optional()
+    }).optional()
+  }).default({}),
+  /** Nombre del subagente que cumple cada rol (para reusar los del repo). */
+  agents: external_exports.record(external_exports.string(), external_exports.string()).default({}),
+  lanes: external_exports.object({
+    /** Carriles que resuelve el flujo propio del repo. Valor = cómo se llama ese flujo. */
+    delegate: external_exports.partialRecord(LaneName, external_exports.string()).default({}),
+    /** Rama base por carril (p. ej. hotfix sale de la rama de producción). */
+    base: external_exports.partialRecord(LaneName, external_exports.string()).default({})
+  }).default({ delegate: {}, base: {} }),
+  memory: external_exports.object({
+    /** Dónde buscar tickets e historia (globs). */
+    searchPaths: external_exports.array(external_exports.string()).default([".harness/memory/episodes/*.md", ".harness/memory/incidents/*.md"]),
+    episodesDir: external_exports.string().default(".harness/memory/episodes"),
+    incidentsDir: external_exports.string().default(".harness/memory/incidents"),
+    filePrefix: external_exports.string().default(""),
+    approvedLessons: external_exports.string().default(".harness/memory/lessons/approved.md"),
+    pendingLessonsDir: external_exports.string().default(".harness/memory/lessons/pending")
+  }).default({
+    searchPaths: [".harness/memory/episodes/*.md", ".harness/memory/incidents/*.md"],
+    episodesDir: ".harness/memory/episodes",
+    incidentsDir: ".harness/memory/incidents",
+    filePrefix: "",
+    approvedLessons: ".harness/memory/lessons/approved.md",
+    pendingLessonsDir: ".harness/memory/lessons/pending"
+  }),
   budgets: external_exports.record(external_exports.string(), LaneBudget).default({}),
   guard: external_exports.object({
-    /** Regex (string) de comandos prohibidos para el agente. */
-    forbiddenCommands: external_exports.array(external_exports.object({ pattern: external_exports.string(), reason: external_exports.string() })).default([])
-  }).default({ forbiddenCommands: [] }),
+    /** Regex (string) de comandos prohibidos para el agente. Prefijo "(?i)" = sin distinguir mayúsculas. */
+    forbiddenCommands: external_exports.array(external_exports.object({ pattern: external_exports.string(), reason: external_exports.string() })).default([]),
+    /** Archivos que el agente no puede editar (regex sobre la ruta). */
+    protectedFiles: external_exports.array(external_exports.string()).default([]),
+    /** Con riesgo alto, `git push` exige un OK humano registrado para el HEAD actual. */
+    humanOkForHighRiskPush: external_exports.boolean().default(false),
+    /** El agente no puede editar el archivo de lecciones aprobadas (las cambia un humano). */
+    protectApprovedLessons: external_exports.boolean().default(true)
+  }).default({ forbiddenCommands: [], protectedFiles: [], humanOkForHighRiskPush: false, protectApprovedLessons: true }),
   /** Mitigación de hotfix. Placeholders {flag} {state}. */
   featureFlags: external_exports.object({ toggleCommand: external_exports.string() }).optional(),
-  gate: external_exports.object({ maxAttempts: external_exports.number().int().positive().default(3) }).default({ maxAttempts: 3 }),
+  gate: external_exports.object({
+    maxAttempts: external_exports.number().int().positive().default(3),
+    /** Con adaptador de test plan, exigir que el trabajo esté commiteado antes del gate. */
+    requireCommitted: external_exports.boolean().default(true)
+  }).default({ maxAttempts: 3, requireCommitted: true }),
   triage: external_exports.object({ minConfidence: external_exports.number().min(0).max(1).default(0.7) }).default({ minConfidence: 0.7 })
 });
 var CONFIG_RELATIVE_PATH = ".harness/config.json";
@@ -19792,13 +19861,15 @@ function hasConfig(repoDir) {
 }
 
 // src/memory/state.ts
-import { appendFileSync, existsSync as existsSync2, mkdirSync, readFileSync as readFileSync2, renameSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync as existsSync2, mkdirSync, readFileSync as readFileSync3, renameSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { dirname, join as join2 } from "node:path";
+import { dirname, join as join3 } from "node:path";
 
 // src/core/git.ts
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { readFileSync as readFileSync2 } from "node:fs";
+import { join as join2 } from "node:path";
 function git(repoDir, args) {
   try {
     return execFileSync("git", args, { cwd: repoDir, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
@@ -19806,19 +19877,27 @@ function git(repoDir, args) {
     return "";
   }
 }
-function changedFiles(repoDir, baseBranch) {
-  const base = git(repoDir, ["merge-base", "HEAD", `origin/${baseBranch}`]) || git(repoDir, ["merge-base", "HEAD", baseBranch]);
+function changedFiles(repoDir, baseRev2) {
+  const base = git(repoDir, ["merge-base", "HEAD", baseRev2]);
   const committed = base ? git(repoDir, ["diff", "--name-only", `${base}...HEAD`]) : "";
   const working = git(repoDir, ["diff", "--name-only", "HEAD"]);
   const untracked = git(repoDir, ["ls-files", "--others", "--exclude-standard"]);
   const files = [committed, working, untracked].join("\n").split("\n").map((f) => f.trim()).filter(Boolean).filter((f) => !f.startsWith(".harness/run/"));
   return [...new Set(files)].sort();
 }
-function diffHash(repoDir, baseBranch) {
-  const files = changedFiles(repoDir, baseBranch).filter((f) => !f.startsWith(".harness/memory/"));
-  const head = git(repoDir, ["rev-parse", "HEAD"]);
-  const content = git(repoDir, ["diff", "HEAD", "--", ...files]);
-  return createHash("sha256").update(head).update(files.join("\n")).update(content).digest("hex").slice(0, 16);
+function diffHash(repoDir, baseRev2, exclude = [".harness/"]) {
+  const files = changedFiles(repoDir, baseRev2).filter((f) => !exclude.some((p) => f.startsWith(p)));
+  const mb = git(repoDir, ["merge-base", "HEAD", baseRev2]) || "HEAD";
+  const h = createHash("sha256").update(files.join("\n"));
+  h.update(git(repoDir, ["diff", mb, "--", ...files]));
+  const untracked = new Set(git(repoDir, ["ls-files", "--others", "--exclude-standard", "--", ...files]).split("\n").filter(Boolean));
+  for (const f of untracked) {
+    try {
+      h.update(f).update(readFileSync2(join2(repoDir, f)));
+    } catch {
+    }
+  }
+  return h.digest("hex").slice(0, 16);
 }
 function repoKey(repoDir) {
   const remote = git(repoDir, ["config", "--get", "remote.origin.url"]);
@@ -19829,10 +19908,10 @@ function repoKey(repoDir) {
 
 // src/memory/state.ts
 function dataDir() {
-  return process.env.CLAUDE_PLUGIN_DATA || process.env.DEV_HARNESS_DATA || join2(homedir(), ".dev-harness");
+  return process.env.CLAUDE_PLUGIN_DATA || process.env.DEV_HARNESS_DATA || join3(homedir(), ".dev-harness");
 }
 function stateDir(repoDir) {
-  return join2(dataDir(), "state", repoKey(repoDir));
+  return join3(dataDir(), "state", repoKey(repoDir));
 }
 function safeId(id) {
   return id.replace(/[^\w.-]+/g, "_");
@@ -19844,29 +19923,45 @@ function atomicWrite(path, content) {
   renameSync(tmp, path);
 }
 function statePath(repoDir, ticketId) {
-  return join2(stateDir(repoDir), `${safeId(ticketId)}.json`);
+  return join3(stateDir(repoDir), `${safeId(ticketId)}.json`);
 }
 function loadState(repoDir, ticketId) {
   const p = statePath(repoDir, ticketId);
-  return existsSync2(p) ? JSON.parse(readFileSync2(p, "utf8")) : void 0;
+  return existsSync2(p) ? JSON.parse(readFileSync3(p, "utf8")) : void 0;
 }
 function saveState(repoDir, state) {
   atomicWrite(statePath(repoDir, state.ticketId), JSON.stringify(state, null, 2));
 }
 function appendJournal(repoDir, ticketId, entry) {
-  const p = join2(stateDir(repoDir), `${safeId(ticketId)}.journal.jsonl`);
+  const p = join3(stateDir(repoDir), `${safeId(ticketId)}.journal.jsonl`);
   mkdirSync(dirname(p), { recursive: true });
   appendFileSync(p, JSON.stringify({ at: (/* @__PURE__ */ new Date()).toISOString(), ...entry }) + "\n");
 }
 var ACTIVE = ".harness/run/active.json";
 function getActiveTicket(repoDir) {
-  const p = join2(repoDir, ACTIVE);
+  const p = join3(repoDir, ACTIVE);
   if (!existsSync2(p)) return void 0;
   try {
-    return JSON.parse(readFileSync2(p, "utf8")).ticketId;
+    return JSON.parse(readFileSync3(p, "utf8")).ticketId;
   } catch {
     return void 0;
   }
+}
+
+// src/core/base.ts
+import { execFileSync as execFileSync2 } from "node:child_process";
+function revExists(repoDir, rev) {
+  try {
+    execFileSync2("git", ["rev-parse", "--verify", "--quiet", `${rev}^{commit}`], { cwd: repoDir, stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+function baseRev(repoDir, cfg, lane) {
+  const branch = lane && cfg.lanes.base[lane] || cfg.baseBranch;
+  const remote = `${cfg.remote}/${branch}`;
+  return revExists(repoDir, remote) ? remote : branch;
 }
 
 // src/core/lane-policy.ts
@@ -19875,26 +19970,33 @@ function laneRequiresGate(lane) {
 }
 
 // src/core/gate.ts
+function harnessOwnPrefixes(cfg) {
+  return [".harness/run/", ".harness/memory/", `${cfg.memory.episodesDir}/${cfg.memory.filePrefix}`, `${cfg.memory.incidentsDir}/${cfg.memory.filePrefix}`, cfg.memory.pendingLessonsDir + "/"];
+}
+function ticketFiles(repoDir, cfg, lane) {
+  const own2 = harnessOwnPrefixes(cfg);
+  return changedFiles(repoDir, baseRev(repoDir, cfg, lane)).filter((f) => !own2.some((p) => f.startsWith(p)));
+}
 function gateStatusForStop(repoDir, ticketId) {
   const s = loadState(repoDir, ticketId);
   if (!s || !s.lane) return { mustBlock: false, reason: "Ticket sin estado o sin carril." };
-  if (!laneRequiresGate(s.lane) || s.status === "escalated" || s.status === "answered" || s.status === "closed") {
+  if (!laneRequiresGate(s.lane) || ["escalated", "answered", "closed", "delegated"].includes(s.status)) {
     return { mustBlock: false, reason: `Estado ${s.status}, carril ${s.lane}.`, state: s };
   }
   const cfg = loadConfig(repoDir);
-  const files = changedFiles(repoDir, cfg.baseBranch).filter((f) => !f.startsWith(".harness/memory/"));
+  const files = ticketFiles(repoDir, cfg, s.lane);
   if (files.length === 0) return { mustBlock: false, reason: "Sin cambios.", state: s };
-  const hash2 = diffHash(repoDir, cfg.baseBranch);
+  const hash2 = diffHash(repoDir, baseRev(repoDir, cfg, s.lane), harnessOwnPrefixes(cfg));
   if (s.gatePassed?.diffHash === hash2) return { mustBlock: false, reason: "Gate OK para este diff.", state: s };
   const why = s.gatePassed ? "El c\xF3digo cambi\xF3 despu\xE9s de que pas\xF3 el gate." : "Todav\xEDa no pas\xF3 el gate.";
   return { mustBlock: true, reason: why, state: s };
 }
 
 // src/hooks/common.ts
-import { readFileSync as readFileSync3 } from "node:fs";
+import { readFileSync as readFileSync4 } from "node:fs";
 function readInput() {
   try {
-    return JSON.parse(readFileSync3(0, "utf8") || "{}");
+    return JSON.parse(readFileSync4(0, "utf8") || "{}");
   } catch {
     return {};
   }

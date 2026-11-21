@@ -3191,9 +3191,9 @@ var require_utils = __commonJS({
         }
       }
       if (bestLength < 2) return hextets.join(":");
-      const head = hextets.slice(0, bestStart).join(":");
+      const head2 = hextets.slice(0, bestStart).join(":");
       const tail2 = hextets.slice(bestStart + bestLength).join(":");
-      return head + "::" + tail2;
+      return head2 + "::" + tail2;
     }
     function normalizeIPv6Address(input2) {
       const compression = input2.indexOf("::");
@@ -3912,58 +3912,58 @@ var require_fast_uri = __commonJS({
       schemelessOptions.skipEscape = true;
       return serialize(resolved, schemelessOptions);
     }
-    function resolveComponent(base, relative2, options, skipNormalization) {
+    function resolveComponent(base2, relative3, options, skipNormalization) {
       const target = {};
       if (!skipNormalization) {
-        base = parse3(serialize(base, options), options);
-        relative2 = parse3(serialize(relative2, options), options);
+        base2 = parse3(serialize(base2, options), options);
+        relative3 = parse3(serialize(relative3, options), options);
       }
       options = options || {};
-      if (!options.tolerant && relative2.scheme) {
-        target.scheme = relative2.scheme;
-        target.userinfo = relative2.userinfo;
-        target.host = relative2.host;
-        target.port = relative2.port;
-        target.path = removeDotSegments(relative2.path || "");
-        target.query = relative2.query;
+      if (!options.tolerant && relative3.scheme) {
+        target.scheme = relative3.scheme;
+        target.userinfo = relative3.userinfo;
+        target.host = relative3.host;
+        target.port = relative3.port;
+        target.path = removeDotSegments(relative3.path || "");
+        target.query = relative3.query;
       } else {
-        if (relative2.userinfo !== void 0 || relative2.host !== void 0 || relative2.port !== void 0) {
-          target.userinfo = relative2.userinfo;
-          target.host = relative2.host;
-          target.port = relative2.port;
-          target.path = removeDotSegments(relative2.path || "");
-          target.query = relative2.query;
+        if (relative3.userinfo !== void 0 || relative3.host !== void 0 || relative3.port !== void 0) {
+          target.userinfo = relative3.userinfo;
+          target.host = relative3.host;
+          target.port = relative3.port;
+          target.path = removeDotSegments(relative3.path || "");
+          target.query = relative3.query;
         } else {
-          if (!relative2.path) {
-            target.path = base.path;
-            if (relative2.query !== void 0) {
-              target.query = relative2.query;
+          if (!relative3.path) {
+            target.path = base2.path;
+            if (relative3.query !== void 0) {
+              target.query = relative3.query;
             } else {
-              target.query = base.query;
+              target.query = base2.query;
             }
           } else {
-            if (relative2.path[0] === "/") {
-              target.path = removeDotSegments(relative2.path);
+            if (relative3.path[0] === "/") {
+              target.path = removeDotSegments(relative3.path);
             } else {
-              const baseHasAuthority = base.userinfo !== void 0 || base.host !== void 0 || base.port !== void 0;
-              if (baseHasAuthority && !base.path) {
-                target.path = "/" + relative2.path;
-              } else if (!base.path) {
-                target.path = relative2.path;
+              const baseHasAuthority = base2.userinfo !== void 0 || base2.host !== void 0 || base2.port !== void 0;
+              if (baseHasAuthority && !base2.path) {
+                target.path = "/" + relative3.path;
+              } else if (!base2.path) {
+                target.path = relative3.path;
               } else {
-                target.path = base.path.slice(0, base.path.lastIndexOf("/") + 1) + relative2.path;
+                target.path = base2.path.slice(0, base2.path.lastIndexOf("/") + 1) + relative3.path;
               }
-              target.path = base.scheme === void 0 && !baseHasAuthority && target.path[0] !== "/" ? removeDotSegmentsRelative(target.path) : removeDotSegments(target.path);
+              target.path = base2.scheme === void 0 && !baseHasAuthority && target.path[0] !== "/" ? removeDotSegmentsRelative(target.path) : removeDotSegments(target.path);
             }
-            target.query = relative2.query;
+            target.query = relative3.query;
           }
-          target.userinfo = base.userinfo;
-          target.host = base.host;
-          target.port = base.port;
+          target.userinfo = base2.userinfo;
+          target.host = base2.host;
+          target.port = base2.port;
         }
-        target.scheme = base.scheme;
+        target.scheme = base2.scheme;
       }
-      target.fragment = relative2.fragment;
+      target.fragment = relative3.fragment;
       return target;
     }
     function equal(uriA, uriB, options) {
@@ -7773,7 +7773,7 @@ var require_scan = __commonJS({
         isExtglob = false;
         isGlob = false;
       }
-      let base = str;
+      let base2 = str;
       let prefix = "";
       let glob = "";
       if (start > 0) {
@@ -7781,31 +7781,31 @@ var require_scan = __commonJS({
         str = str.slice(start);
         lastIndex -= start;
       }
-      if (base && isGlob === true && lastIndex > 0) {
-        base = str.slice(0, lastIndex);
+      if (base2 && isGlob === true && lastIndex > 0) {
+        base2 = str.slice(0, lastIndex);
         glob = str.slice(lastIndex);
       } else if (isGlob === true) {
-        base = "";
+        base2 = "";
         glob = str;
       } else {
-        base = str;
+        base2 = str;
       }
-      if (base && base !== "" && base !== "/" && base !== str) {
-        if (isPathSeparator(base.charCodeAt(base.length - 1))) {
-          base = base.slice(0, -1);
+      if (base2 && base2 !== "" && base2 !== "/" && base2 !== str) {
+        if (isPathSeparator(base2.charCodeAt(base2.length - 1))) {
+          base2 = base2.slice(0, -1);
         }
       }
       if (opts.unescape === true) {
         if (glob) glob = utils.removeBackslashes(glob);
-        if (base && backslashes === true) {
-          base = utils.removeBackslashes(base);
+        if (base2 && backslashes === true) {
+          base2 = utils.removeBackslashes(base2);
         }
       }
       const state = {
         prefix,
         input: input2,
         start,
-        base,
+        base: base2,
         glob,
         isBrace,
         isBracket,
@@ -8884,9 +8884,9 @@ var require_picomatch = __commonJS({
     var utils = require_utils2();
     var constants = require_constants();
     var isObject2 = (val) => val && typeof val === "object" && !Array.isArray(val);
-    var picomatch2 = (glob, options, returnState = false) => {
+    var picomatch3 = (glob, options, returnState = false) => {
       if (Array.isArray(glob)) {
-        const fns = glob.map((input2) => picomatch2(input2, options, returnState));
+        const fns = glob.map((input2) => picomatch3(input2, options, returnState));
         const arrayMatcher = (str) => {
           for (const isMatch of fns) {
             const state2 = isMatch(str);
@@ -8902,16 +8902,16 @@ var require_picomatch = __commonJS({
       }
       const opts = options || {};
       const posix = opts.windows;
-      const regex = isState ? picomatch2.compileRe(glob, options) : picomatch2.makeRe(glob, options, false, true);
+      const regex = isState ? picomatch3.compileRe(glob, options) : picomatch3.makeRe(glob, options, false, true);
       const state = regex.state;
       delete regex.state;
       let isIgnored = () => false;
       if (opts.ignore) {
         const ignoreOpts = { ...options, ignore: null, onMatch: null, onResult: null };
-        isIgnored = picomatch2(opts.ignore, ignoreOpts, returnState);
+        isIgnored = picomatch3(opts.ignore, ignoreOpts, returnState);
       }
       const matcher = (input2, returnObject = false) => {
-        const { isMatch, match, output: output2 } = picomatch2.test(input2, regex, options, { glob, posix });
+        const { isMatch, match, output: output2 } = picomatch3.test(input2, regex, options, { glob, posix });
         const result = { glob, state, regex, posix, input: input2, output: output2, match, isMatch };
         if (typeof opts.onResult === "function") {
           opts.onResult(result);
@@ -8937,7 +8937,7 @@ var require_picomatch = __commonJS({
       }
       return matcher;
     };
-    picomatch2.test = (input2, regex, options, { glob, posix } = {}) => {
+    picomatch3.test = (input2, regex, options, { glob, posix } = {}) => {
       if (typeof input2 !== "string") {
         throw new TypeError("Expected input to be a string");
       }
@@ -8954,24 +8954,24 @@ var require_picomatch = __commonJS({
       }
       if (match === false || opts.capture === true) {
         if (opts.matchBase === true || opts.basename === true) {
-          match = picomatch2.matchBase(input2, regex, options, posix);
+          match = picomatch3.matchBase(input2, regex, options, posix);
         } else {
           match = regex.exec(output2);
         }
       }
       return { isMatch: Boolean(match), match, output: output2 };
     };
-    picomatch2.matchBase = (input2, glob, options, posix = options && options.windows) => {
-      const regex = glob instanceof RegExp ? glob : picomatch2.makeRe(glob, options);
+    picomatch3.matchBase = (input2, glob, options, posix = options && options.windows) => {
+      const regex = glob instanceof RegExp ? glob : picomatch3.makeRe(glob, options);
       return regex.test(utils.basename(input2, { windows: posix }));
     };
-    picomatch2.isMatch = (str, patterns, options) => picomatch2(patterns, options)(str);
-    picomatch2.parse = (pattern, options) => {
-      if (Array.isArray(pattern)) return pattern.map((p) => picomatch2.parse(p, options));
+    picomatch3.isMatch = (str, patterns, options) => picomatch3(patterns, options)(str);
+    picomatch3.parse = (pattern, options) => {
+      if (Array.isArray(pattern)) return pattern.map((p) => picomatch3.parse(p, options));
       return parse3(pattern, { ...options, fastpaths: false });
     };
-    picomatch2.scan = (input2, options) => scan(input2, options);
-    picomatch2.compileRe = (state, options, returnOutput = false, returnState = false) => {
+    picomatch3.scan = (input2, options) => scan(input2, options);
+    picomatch3.compileRe = (state, options, returnOutput = false, returnState = false) => {
       if (returnOutput === true) {
         return state.output;
       }
@@ -8982,13 +8982,13 @@ var require_picomatch = __commonJS({
       if (state && state.negated === true) {
         source = `^(?!${source}).*$`;
       }
-      const regex = picomatch2.toRegex(source, options);
+      const regex = picomatch3.toRegex(source, options);
       if (returnState === true) {
         regex.state = state;
       }
       return regex;
     };
-    picomatch2.makeRe = (input2, options = {}, returnOutput = false, returnState = false) => {
+    picomatch3.makeRe = (input2, options = {}, returnOutput = false, returnState = false) => {
       if (!input2 || typeof input2 !== "string") {
         throw new TypeError("Expected a non-empty string");
       }
@@ -8999,9 +8999,9 @@ var require_picomatch = __commonJS({
       if (!parsed.output) {
         parsed = parse3(input2, options);
       }
-      return picomatch2.compileRe(parsed, options, returnOutput, returnState);
+      return picomatch3.compileRe(parsed, options, returnOutput, returnState);
     };
-    picomatch2.toRegex = (source, options) => {
+    picomatch3.toRegex = (source, options) => {
       try {
         const opts = options || {};
         return new RegExp(source, opts.flags || (opts.nocase ? "i" : ""));
@@ -9010,8 +9010,8 @@ var require_picomatch = __commonJS({
         return /$^/;
       }
     };
-    picomatch2.constants = constants;
-    module.exports = picomatch2;
+    picomatch3.constants = constants;
+    module.exports = picomatch3;
   }
 });
 
@@ -9021,20 +9021,20 @@ var require_picomatch2 = __commonJS({
     "use strict";
     var pico = require_picomatch();
     var utils = require_utils2();
-    function picomatch2(glob, options, returnState = false) {
+    function picomatch3(glob, options, returnState = false) {
       if (options && (options.windows === null || options.windows === void 0)) {
         options = { ...options, windows: utils.isWindows() };
       }
       return pico(glob, options, returnState);
     }
-    Object.assign(picomatch2, pico);
-    module.exports = picomatch2;
+    Object.assign(picomatch3, pico);
+    module.exports = picomatch3;
   }
 });
 
 // src/mcp/server.ts
-import { existsSync as existsSync4, mkdirSync as mkdirSync3 } from "node:fs";
-import { join as join4 } from "node:path";
+import { existsSync as existsSync5, mkdirSync as mkdirSync4 } from "node:fs";
+import { join as join6 } from "node:path";
 
 // node_modules/zod/v3/helpers/util.js
 var util;
@@ -12584,23 +12584,23 @@ var ZodEffects = class extends ZodType {
     }
     if (effect.type === "transform") {
       if (ctx.common.async === false) {
-        const base = this._def.schema._parseSync({
+        const base2 = this._def.schema._parseSync({
           data: ctx.data,
           path: ctx.path,
           parent: ctx
         });
-        if (!isValid(base))
+        if (!isValid(base2))
           return INVALID;
-        const result = effect.transform(base.value, checkCtx);
+        const result = effect.transform(base2.value, checkCtx);
         if (result instanceof Promise) {
           throw new Error(`Asynchronous transform encountered during synchronous parse operation. Use .parseAsync instead.`);
         }
         return { status: status.value, value: result };
       } else {
-        return this._def.schema._parseAsync({ data: ctx.data, path: ctx.path, parent: ctx }).then((base) => {
-          if (!isValid(base))
+        return this._def.schema._parseAsync({ data: ctx.data, path: ctx.path, parent: ctx }).then((base2) => {
+          if (!isValid(base2))
             return INVALID;
-          return Promise.resolve(effect.transform(base.value, checkCtx)).then((result) => ({
+          return Promise.resolve(effect.transform(base2.value, checkCtx)).then((result) => ({
             status: status.value,
             value: result
           }));
@@ -17900,14 +17900,14 @@ var memo = {
     var _a3;
     (_a3 = inst._zod).deferred ?? (_a3.deferred = []);
     inst._zod.deferred.push(() => {
-      const base = inst._zod.parse;
+      const base2 = inst._zod.parse;
       const wrapped = (payload, ctx) => {
         if (ctx.direction !== "backward" && isBackEdge(ctx, payload.value))
           throw new $ZodCyclicError();
-        return base(payload, ctx);
+        return base2(payload, ctx);
       };
       inst._zod.parse = wrapped;
-      if (inst._zod.run === base)
+      if (inst._zod.run === base2)
         inst._zod.run = wrapped;
     });
   },
@@ -17919,15 +17919,15 @@ var memo = {
     let lastBucket;
     (_a3 = inst._zod).deferred ?? (_a3.deferred = []);
     inst._zod.deferred.push(() => {
-      const base = inst._zod.parse;
+      const base2 = inst._zod.parse;
       const wrapped = (payload, ctx) => {
         if (isRecursiveInst === void 0) {
           const walked = isRecursive(inst, /* @__PURE__ */ new Set(), false);
           if (walked === NONE) {
-            inst._zod.parse = base;
+            inst._zod.parse = base2;
             if (inst._zod.run === wrapped)
-              inst._zod.run = base;
-            return base(payload, ctx);
+              inst._zod.run = base2;
+            return base2(payload, ctx);
           }
           if (walked === PROVEN || rechecked)
             isRecursiveInst = true;
@@ -17936,7 +17936,7 @@ var memo = {
         }
         const input2 = payload.value;
         if (!isRef(input2))
-          return base(payload, ctx);
+          return base2(payload, ctx);
         let state = ctx[STATE];
         if (!state) {
           state = { buckets: /* @__PURE__ */ new WeakMap(), backEdges: void 0 };
@@ -17965,7 +17965,7 @@ var memo = {
         }
         handoff = bucket;
         const depth = open.length;
-        const result = base(payload, ctx);
+        const result = base2(payload, ctx);
         handoff = void 0;
         const entry = open.length > depth ? open.pop() : void 0;
         if (result instanceof Promise) {
@@ -17980,7 +17980,7 @@ var memo = {
         return result;
       };
       inst._zod.parse = wrapped;
-      if (inst._zod.run === base)
+      if (inst._zod.run === base2)
         inst._zod.run = wrapped;
     });
   }
@@ -35257,19 +35257,19 @@ function parseNullableDef(def, refs) {
     };
   }
   if (refs.target === "openApi3") {
-    const base2 = parseDef(def.innerType._def, {
+    const base3 = parseDef(def.innerType._def, {
       ...refs,
       currentPath: [...refs.currentPath]
     });
-    if (base2 && "$ref" in base2)
-      return { allOf: [base2], nullable: true };
-    return base2 && { ...base2, nullable: true };
+    if (base3 && "$ref" in base3)
+      return { allOf: [base3], nullable: true };
+    return base3 && { ...base3, nullable: true };
   }
-  const base = parseDef(def.innerType._def, {
+  const base2 = parseDef(def.innerType._def, {
     ...refs,
     currentPath: [...refs.currentPath, "anyOf", "0"]
   });
-  return base && { anyOf: [base, { type: "null" }] };
+  return base2 && { anyOf: [base2, { type: "null" }] };
 }
 
 // node_modules/zod-to-json-schema/dist/esm/parsers/number.js
@@ -36696,8 +36696,8 @@ var Protocol = class {
 function isPlainObject2(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
-function mergeCapabilities(base, additional) {
-  const result = { ...base };
+function mergeCapabilities(base2, additional) {
+  const result = { ...base2 };
   for (const key in additional) {
     const k = key;
     const addValue = additional[k];
@@ -38441,49 +38441,118 @@ import { join } from "node:path";
 var ScopedCommand = external_exports.object({
   /** Globs de archivos a los que aplica este comando. */
   paths: external_exports.array(external_exports.string()),
-  /** Comando. Placeholders: {files} (archivos afectados, relativos a cwd), {grep}. */
+  /** Comando. Placeholders: {files} (archivos afectados, relativos a cwd), {base}. */
   command: external_exports.string(),
   /** Directorio desde donde correr el comando (relativo a la raíz). */
   cwd: external_exports.string().default("."),
   /** Si es true, {files} se reescribe relativo a `cwd`. */
   relativeFiles: external_exports.boolean().default(true)
 });
+var CommandOrScoped = external_exports.union([external_exports.string(), external_exports.array(ScopedCommand)]);
 var LaneBudget = external_exports.object({ gateMinutes: external_exports.number().positive() });
+var LaneName = external_exports.enum(["hotfix", "bugfix", "fast-feature", "full-feature", "query", "chore", "human-triage"]);
 var HarnessConfigSchema = external_exports.object({
   baseBranch: external_exports.string().default("main"),
+  /** Remoto contra el que se compara (`<remote>/<baseBranch>`). */
+  remote: external_exports.string().default("origin"),
   protectedBranches: external_exports.array(external_exports.string()).default(["main", "master"]),
-  /** Rutas donde un cambio sube el riesgo (auth, pagos, migraciones, infra). */
+  /** Rutas donde un cambio sube el riesgo (auth, pagos, migraciones, infra). Modo autónomo. */
   criticalPaths: external_exports.array(external_exports.string()).default([]),
-  /** Código compartido: un cambio acá puede afectar todo. */
+  /** Código compartido: un cambio acá puede afectar todo. Modo autónomo. */
   sharedPaths: external_exports.array(external_exports.string()).default([]),
-  /** Test impact analysis: glob -> flujos e2e que lo cubren. */
+  /** Test impact analysis: glob -> flujos e2e que lo cubren. Modo autónomo. */
   testImpact: external_exports.record(external_exports.string(), external_exports.array(external_exports.string())).default({}),
   /** Flujos que siempre se protegen (smoke de hotfix, cambios en código compartido). */
   criticalFlows: external_exports.array(external_exports.string()).default([]),
   /** Cómo se transforma un flujo en el filtro del runner e2e. Ej: "@{flow}". */
   e2eTagFormat: external_exports.string().default("@{flow}"),
   commands: external_exports.object({
-    build: external_exports.string().optional(),
-    lint: external_exports.string().optional(),
-    typecheck: external_exports.string().optional(),
+    build: CommandOrScoped.optional(),
+    lint: CommandOrScoped.optional(),
+    typecheck: CommandOrScoped.optional(),
     unit: external_exports.array(ScopedCommand).default([]),
     integration: external_exports.array(ScopedCommand).default([]),
-    /** Corre e2e filtrados. Placeholder {grep} = tags unidos con "|". */
+    /** Corre e2e filtrados por tag. Placeholder {grep} = tags unidos con "|". */
     e2e: external_exports.string().optional(),
+    /** Corre una lista de specs e2e. Placeholder {specs}. Si falta, los specs quedan para el revisor. */
+    e2eSpecs: external_exports.string().optional(),
     visual: external_exports.string().optional(),
     /** Screenshot de una URL. Placeholders: {url} {out}. */
     screenshot: external_exports.string().optional(),
     /** Comando para servicios que necesitan los tests (Postgres, Redis...). */
     servicesUp: external_exports.string().optional()
   }),
+  /** Usar los scripts que el repo ya tiene en vez de las reglas del arnés. */
+  adapters: external_exports.object({
+    risk: external_exports.object({
+      /** Ej: "./ops/harness/riesgo.sh {base}". Debe imprimir el nivel. */
+      command: external_exports.string(),
+      levelRegex: external_exports.string().default("RIESGO:\\s*(\\w+)"),
+      /** Líneas con archivos que justifican el nivel. Grupo 1 = ruta. */
+      fileRegex: external_exports.string().default("^\\s+(\\S+)\\s+\\("),
+      levels: external_exports.record(external_exports.string(), external_exports.enum(["low", "medium", "high"])).default({
+        bajo: "low",
+        medio: "medium",
+        alto: "high",
+        low: "low",
+        medium: "medium",
+        high: "high"
+      })
+    }).optional(),
+    testPlan: external_exports.object({
+      /** Ej: "node ops/harness/specs-afectados.mjs {base} --hasta HEAD --json". Requiere el trabajo commiteado. */
+      command: external_exports.string(),
+      format: external_exports.literal("specs-afectados").default("specs-afectados"),
+      /** Placeholder {patterns}. */
+      jest: external_exports.string().optional(),
+      /** Placeholder {files}. */
+      nodeTestClient: external_exports.string().optional(),
+      /** Placeholder {files}. */
+      nodeTestHarness: external_exports.string().optional()
+    }).optional()
+  }).default({}),
+  /** Nombre del subagente que cumple cada rol (para reusar los del repo). */
+  agents: external_exports.record(external_exports.string(), external_exports.string()).default({}),
+  lanes: external_exports.object({
+    /** Carriles que resuelve el flujo propio del repo. Valor = cómo se llama ese flujo. */
+    delegate: external_exports.partialRecord(LaneName, external_exports.string()).default({}),
+    /** Rama base por carril (p. ej. hotfix sale de la rama de producción). */
+    base: external_exports.partialRecord(LaneName, external_exports.string()).default({})
+  }).default({ delegate: {}, base: {} }),
+  memory: external_exports.object({
+    /** Dónde buscar tickets e historia (globs). */
+    searchPaths: external_exports.array(external_exports.string()).default([".harness/memory/episodes/*.md", ".harness/memory/incidents/*.md"]),
+    episodesDir: external_exports.string().default(".harness/memory/episodes"),
+    incidentsDir: external_exports.string().default(".harness/memory/incidents"),
+    filePrefix: external_exports.string().default(""),
+    approvedLessons: external_exports.string().default(".harness/memory/lessons/approved.md"),
+    pendingLessonsDir: external_exports.string().default(".harness/memory/lessons/pending")
+  }).default({
+    searchPaths: [".harness/memory/episodes/*.md", ".harness/memory/incidents/*.md"],
+    episodesDir: ".harness/memory/episodes",
+    incidentsDir: ".harness/memory/incidents",
+    filePrefix: "",
+    approvedLessons: ".harness/memory/lessons/approved.md",
+    pendingLessonsDir: ".harness/memory/lessons/pending"
+  }),
   budgets: external_exports.record(external_exports.string(), LaneBudget).default({}),
   guard: external_exports.object({
-    /** Regex (string) de comandos prohibidos para el agente. */
-    forbiddenCommands: external_exports.array(external_exports.object({ pattern: external_exports.string(), reason: external_exports.string() })).default([])
-  }).default({ forbiddenCommands: [] }),
+    /** Regex (string) de comandos prohibidos para el agente. Prefijo "(?i)" = sin distinguir mayúsculas. */
+    forbiddenCommands: external_exports.array(external_exports.object({ pattern: external_exports.string(), reason: external_exports.string() })).default([]),
+    /** Archivos que el agente no puede editar (regex sobre la ruta). */
+    protectedFiles: external_exports.array(external_exports.string()).default([]),
+    /** Con riesgo alto, `git push` exige un OK humano registrado para el HEAD actual. */
+    humanOkForHighRiskPush: external_exports.boolean().default(false),
+    /** El agente no puede editar el archivo de lecciones aprobadas (las cambia un humano). */
+    protectApprovedLessons: external_exports.boolean().default(true)
+  }).default({ forbiddenCommands: [], protectedFiles: [], humanOkForHighRiskPush: false, protectApprovedLessons: true }),
   /** Mitigación de hotfix. Placeholders {flag} {state}. */
   featureFlags: external_exports.object({ toggleCommand: external_exports.string() }).optional(),
-  gate: external_exports.object({ maxAttempts: external_exports.number().int().positive().default(3) }).default({ maxAttempts: 3 }),
+  gate: external_exports.object({
+    maxAttempts: external_exports.number().int().positive().default(3),
+    /** Con adaptador de test plan, exigir que el trabajo esté commiteado antes del gate. */
+    requireCommitted: external_exports.boolean().default(true)
+  }).default({ maxAttempts: 3, requireCommitted: true }),
   triage: external_exports.object({ minConfidence: external_exports.number().min(0).max(1).default(0.7) }).default({ minConfidence: 0.7 })
 });
 var CONFIG_RELATIVE_PATH = ".harness/config.json";
@@ -38499,6 +38568,28 @@ function loadConfig(repoDir2) {
 }
 function hasConfig(repoDir2) {
   return existsSync(join(repoDir2, CONFIG_RELATIVE_PATH));
+}
+function agentFor(cfg, role) {
+  if (cfg.agents[role]) return cfg.agents[role];
+  if (role === "security-reviewer") return cfg.agents.reviewer ?? "dev-harness:reviewer";
+  return `dev-harness:${role}`;
+}
+var ROLES = [
+  "triage",
+  "hotfix-investigator",
+  "bug-reproducer",
+  "bug-fixer",
+  "ui-implementer",
+  "visual-evaluator",
+  "planner",
+  "worker",
+  "integrator",
+  "reviewer",
+  "security-reviewer",
+  "query-answerer"
+];
+function agentMap(cfg) {
+  return Object.fromEntries(ROLES.map((r) => [r, agentFor(cfg, r)]));
 }
 
 // src/core/exec.ts
@@ -38548,21 +38639,26 @@ async function runSteps(steps, cwd, budgetMinutes) {
 }
 function summarize(results) {
   return results.map((r) => {
-    const head = `${r.ok ? "\u2714" : "\u2718"} [${r.step.level}] ${r.step.reason} \u2014 ${(r.durationMs / 1e3).toFixed(1)}s${r.timedOut ? " (TIMEOUT)" : ""}
+    const head2 = `${r.ok ? "\u2714" : "\u2718"} [${r.step.level}] ${r.step.reason} \u2014 ${(r.durationMs / 1e3).toFixed(1)}s${r.timedOut ? " (TIMEOUT)" : ""}
   $ ${r.step.command}`;
-    return r.ok ? head : `${head}
+    return r.ok ? head2 : `${head2}
 ${r.output}`;
   }).join("\n\n");
 }
 
+// src/core/gate.ts
+import { execSync as execSync2 } from "node:child_process";
+
 // src/memory/state.ts
-import { appendFileSync, existsSync as existsSync2, mkdirSync, readFileSync as readFileSync2, renameSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync as existsSync2, mkdirSync, readFileSync as readFileSync3, renameSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { dirname, join as join2 } from "node:path";
+import { dirname, join as join3 } from "node:path";
 
 // src/core/git.ts
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { readFileSync as readFileSync2 } from "node:fs";
+import { join as join2 } from "node:path";
 function git(repoDir2, args) {
   try {
     return execFileSync("git", args, { cwd: repoDir2, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
@@ -38570,19 +38666,27 @@ function git(repoDir2, args) {
     return "";
   }
 }
-function changedFiles(repoDir2, baseBranch) {
-  const base = git(repoDir2, ["merge-base", "HEAD", `origin/${baseBranch}`]) || git(repoDir2, ["merge-base", "HEAD", baseBranch]);
-  const committed = base ? git(repoDir2, ["diff", "--name-only", `${base}...HEAD`]) : "";
+function changedFiles(repoDir2, baseRev2) {
+  const base2 = git(repoDir2, ["merge-base", "HEAD", baseRev2]);
+  const committed = base2 ? git(repoDir2, ["diff", "--name-only", `${base2}...HEAD`]) : "";
   const working = git(repoDir2, ["diff", "--name-only", "HEAD"]);
   const untracked = git(repoDir2, ["ls-files", "--others", "--exclude-standard"]);
   const files = [committed, working, untracked].join("\n").split("\n").map((f) => f.trim()).filter(Boolean).filter((f) => !f.startsWith(".harness/run/"));
   return [...new Set(files)].sort();
 }
-function diffHash(repoDir2, baseBranch) {
-  const files = changedFiles(repoDir2, baseBranch).filter((f) => !f.startsWith(".harness/memory/"));
-  const head = git(repoDir2, ["rev-parse", "HEAD"]);
-  const content = git(repoDir2, ["diff", "HEAD", "--", ...files]);
-  return createHash("sha256").update(head).update(files.join("\n")).update(content).digest("hex").slice(0, 16);
+function diffHash(repoDir2, baseRev2, exclude = [".harness/"]) {
+  const files = changedFiles(repoDir2, baseRev2).filter((f) => !exclude.some((p) => f.startsWith(p)));
+  const mb = git(repoDir2, ["merge-base", "HEAD", baseRev2]) || "HEAD";
+  const h = createHash("sha256").update(files.join("\n"));
+  h.update(git(repoDir2, ["diff", mb, "--", ...files]));
+  const untracked = new Set(git(repoDir2, ["ls-files", "--others", "--exclude-standard", "--", ...files]).split("\n").filter(Boolean));
+  for (const f of untracked) {
+    try {
+      h.update(f).update(readFileSync2(join2(repoDir2, f)));
+    } catch {
+    }
+  }
+  return h.digest("hex").slice(0, 16);
 }
 function headSha(repoDir2) {
   return git(repoDir2, ["rev-parse", "--short", "HEAD"]);
@@ -38593,13 +38697,17 @@ function repoKey(repoDir2) {
   const source = remote || top;
   return source.replace(/^.*[/:]([^/:]+\/[^/]+?)(\.git)?$/, "$1").replace(/[^\w.-]+/g, "_");
 }
+function uncommitted(repoDir2, ignorePrefixes = []) {
+  const out = git(repoDir2, ["status", "--porcelain", "--untracked-files=all"]);
+  return out.split("\n").map((l) => l.slice(3).trim()).filter(Boolean).map((f) => f.includes(" -> ") ? f.split(" -> ")[1] : f).filter((f) => !ignorePrefixes.some((p) => f.startsWith(p)));
+}
 
 // src/memory/state.ts
 function dataDir() {
-  return process.env.CLAUDE_PLUGIN_DATA || process.env.DEV_HARNESS_DATA || join2(homedir(), ".dev-harness");
+  return process.env.CLAUDE_PLUGIN_DATA || process.env.DEV_HARNESS_DATA || join3(homedir(), ".dev-harness");
 }
 function stateDir(repoDir2) {
-  return join2(dataDir(), "state", repoKey(repoDir2));
+  return join3(dataDir(), "state", repoKey(repoDir2));
 }
 function safeId(id) {
   return id.replace(/[^\w.-]+/g, "_");
@@ -38611,11 +38719,11 @@ function atomicWrite(path, content) {
   renameSync(tmp, path);
 }
 function statePath(repoDir2, ticketId) {
-  return join2(stateDir(repoDir2), `${safeId(ticketId)}.json`);
+  return join3(stateDir(repoDir2), `${safeId(ticketId)}.json`);
 }
 function loadState(repoDir2, ticketId) {
   const p = statePath(repoDir2, ticketId);
-  return existsSync2(p) ? JSON.parse(readFileSync2(p, "utf8")) : void 0;
+  return existsSync2(p) ? JSON.parse(readFileSync3(p, "utf8")) : void 0;
 }
 function saveState(repoDir2, state) {
   atomicWrite(statePath(repoDir2, state.ticketId), JSON.stringify(state, null, 2));
@@ -38644,43 +38752,53 @@ function createState(repoDir2, ticketId, title, source) {
   return s;
 }
 function appendJournal(repoDir2, ticketId, entry) {
-  const p = join2(stateDir(repoDir2), `${safeId(ticketId)}.journal.jsonl`);
+  const p = join3(stateDir(repoDir2), `${safeId(ticketId)}.journal.jsonl`);
   mkdirSync(dirname(p), { recursive: true });
   appendFileSync(p, JSON.stringify({ at: (/* @__PURE__ */ new Date()).toISOString(), ...entry }) + "\n");
 }
 function readJournal(repoDir2, ticketId) {
-  const p = join2(stateDir(repoDir2), `${safeId(ticketId)}.journal.jsonl`);
+  const p = join3(stateDir(repoDir2), `${safeId(ticketId)}.journal.jsonl`);
   if (!existsSync2(p)) return [];
-  return readFileSync2(p, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l));
+  return readFileSync3(p, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l));
 }
 var ACTIVE = ".harness/run/active.json";
 function setActiveTicket(repoDir2, ticketId) {
-  atomicWrite(join2(repoDir2, ACTIVE), JSON.stringify({ ticketId }, null, 2));
+  atomicWrite(join3(repoDir2, ACTIVE), JSON.stringify({ ticketId }, null, 2));
 }
 function getActiveTicket(repoDir2) {
-  const p = join2(repoDir2, ACTIVE);
+  const p = join3(repoDir2, ACTIVE);
   if (!existsSync2(p)) return void 0;
   try {
-    return JSON.parse(readFileSync2(p, "utf8")).ticketId;
+    return JSON.parse(readFileSync3(p, "utf8")).ticketId;
   } catch {
     return void 0;
   }
 }
 
 // src/memory/episodes.ts
-import { existsSync as existsSync3, mkdirSync as mkdirSync2, readdirSync, readFileSync as readFileSync3, writeFileSync as writeFileSync2 } from "node:fs";
-import { join as join3 } from "node:path";
-var MEM = ".harness/memory";
+var import_picomatch = __toESM(require_picomatch2(), 1);
+import { existsSync as existsSync3, mkdirSync as mkdirSync2, readdirSync, readFileSync as readFileSync4, statSync, writeFileSync as writeFileSync2 } from "node:fs";
+import { join as join4, relative } from "node:path";
+var DEFAULT_MEM = {
+  searchPaths: [".harness/memory/episodes/*.md", ".harness/memory/incidents/*.md"],
+  episodesDir: ".harness/memory/episodes",
+  incidentsDir: ".harness/memory/incidents",
+  filePrefix: "",
+  approvedLessons: ".harness/memory/lessons/approved.md",
+  pendingLessonsDir: ".harness/memory/lessons/pending"
+};
+var mem = (cfg) => cfg?.memory ?? DEFAULT_MEM;
 function slug(s) {
   return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 50);
 }
 function yamlList(xs) {
   return `[${xs.map((x) => JSON.stringify(x)).join(", ")}]`;
 }
-function writeEpisode(repoDir2, e, kind = "episodes") {
-  const dir = join3(repoDir2, MEM, kind);
+function writeEpisode(repoDir2, e, kind = "episodes", cfg) {
+  const m = mem(cfg);
+  const dir = join4(repoDir2, kind === "episodes" ? m.episodesDir : m.incidentsDir);
   mkdirSync2(dir, { recursive: true });
-  const file2 = join3(dir, `${e.date.slice(0, 10)}-${slug(e.ticketId)}.md`);
+  const file2 = join4(dir, `${m.filePrefix}${e.date.slice(0, 10)}-${slug(e.ticketId)}-${slug(e.title).slice(0, 30)}.md`);
   const md = `---
 ticket: ${JSON.stringify(e.ticketId)}
 title: ${JSON.stringify(e.title)}
@@ -38716,50 +38834,74 @@ function frontmatter(md, key) {
   const m = md.match(new RegExp(`^${key}:\\s*(.*)$`, "m"));
   return m ? m[1].replace(/^"|"$/g, "") : "";
 }
+function expandGlobs(repoDir2, patterns) {
+  const out = /* @__PURE__ */ new Set();
+  for (const pat of patterns) {
+    const fixed = pat.split("/").filter((seg) => !/[*?[{]/.test(seg));
+    const firstGlob = pat.split("/").findIndex((seg) => /[*?[{]/.test(seg));
+    const root = join4(repoDir2, ...firstGlob < 0 ? fixed.slice(0, -1) : pat.split("/").slice(0, firstGlob));
+    if (!existsSync3(root)) continue;
+    const isMatch = (0, import_picomatch.default)(pat, { dot: false });
+    const walk = (dir, depth) => {
+      if (depth > 6) return;
+      for (const name of readdirSync(dir)) {
+        if (name === "node_modules" || name.startsWith(".git")) continue;
+        const abs = join4(dir, name);
+        const st = statSync(abs);
+        if (st.isDirectory()) walk(abs, depth + 1);
+        else {
+          const rel = relative(repoDir2, abs);
+          if (isMatch(rel)) out.add(rel);
+        }
+      }
+    };
+    walk(root, 0);
+  }
+  return [...out].sort();
+}
 function searchMemory(repoDir2, query, opts = {}) {
   const q = tokens(query);
   if (q.length === 0) return [];
-  const docs = [];
-  for (const kind of ["episodes", "incidents"]) {
-    const dir = join3(repoDir2, MEM, kind);
-    if (!existsSync3(dir)) continue;
-    for (const f of readdirSync(dir)) if (f.endsWith(".md")) docs.push({ path: join3(MEM, kind, f), text: readFileSync3(join3(dir, f), "utf8") });
-  }
+  const docs = expandGlobs(repoDir2, mem(opts.cfg).searchPaths).map((path) => ({ path, text: readFileSync4(join4(repoDir2, path), "utf8") }));
   const N = docs.length || 1;
   const df = /* @__PURE__ */ new Map();
   const docTokens = docs.map((d) => {
-    const ts = tokens(d.text);
+    const ts = tokens(d.path + " " + d.text);
     new Set(ts).forEach((t) => df.set(t, (df.get(t) ?? 0) + 1));
     return ts;
   });
   const hits = docs.map((d, i) => {
     const ts = docTokens[i];
+    const len = ts.length || 1;
     let score = 0;
     for (const t of q) {
-      const tf = ts.filter((x) => x === t).length;
-      if (tf) score += tf / (tf + 1.2) * Math.log(1 + N / (df.get(t) ?? 1));
+      let tf = 0;
+      for (const x of ts) if (x === t) tf++;
+      if (tf) score += tf * 2.2 / (tf + 1.2 * (0.25 + 0.75 * (len / 800))) * Math.log(1 + N / (df.get(t) ?? 1));
     }
-    if (opts.module && frontmatter(d.text, "modules").includes(opts.module)) score *= 1.5;
-    if (d.path.includes("/incidents/")) score *= 1.2;
+    if (opts.module && (frontmatter(d.text, "modules").includes(opts.module) || d.path.includes(opts.module))) score *= 1.5;
+    if (/incident|incidente|hotfix/i.test(d.path)) score *= 1.2;
     const files = (frontmatter(d.text, "files").match(/"([^"]+)"/g) ?? []).map((x) => x.slice(1, -1));
     const stale = opts.existingFiles ? files.length > 0 && files.every((f) => !opts.existingFiles(f)) : false;
-    const body = d.text.split(/^---$/m).slice(2).join("---").trim();
+    const hasFm = d.text.startsWith("---");
+    const body = (hasFm ? d.text.split(/^---$/m).slice(2).join("---") : d.text).trim();
+    const heading = body.match(/^#+\s+(.+)$/m)?.[1] ?? "";
     return {
       path: d.path,
       score: stale ? score * 0.5 : score,
-      ticket: frontmatter(d.text, "ticket"),
-      title: frontmatter(d.text, "title"),
+      ticket: frontmatter(d.text, "ticket") || d.path.replace(/^.*\//, "").replace(/\.md$/, ""),
+      title: frontmatter(d.text, "title") || heading,
       excerpt: body.slice(0, 700),
       stale
     };
   });
   return hits.filter((h) => h.score > 0).sort((a, b) => b.score - a.score).slice(0, opts.limit ?? 3);
 }
-function proposeLesson(repoDir2, lesson) {
-  const dir = join3(repoDir2, MEM, "lessons", "pending");
+function proposeLesson(repoDir2, lesson, cfg) {
+  const dir = join4(repoDir2, mem(cfg).pendingLessonsDir);
   mkdirSync2(dir, { recursive: true });
   const date5 = (/* @__PURE__ */ new Date()).toISOString();
-  const file2 = join3(dir, `${date5.slice(0, 10)}-${slug(lesson.title)}.md`);
+  const file2 = join4(dir, `${date5.slice(0, 10)}-${slug(lesson.title)}.md`);
   writeFileSync2(
     file2,
     `---
@@ -38776,19 +38918,45 @@ ${lesson.rule}
 ## Evidencia
 ${lesson.evidence}
 
-> Pendiente de aprobaci\xF3n humana. Para aprobarla, movela a lessons/approved.md en un PR.
+> Pendiente de aprobaci\xF3n humana. Para aprobarla, pasala a ${mem(cfg).approvedLessons} en un PR/MR.
 `
   );
   return file2;
 }
-function approvedLessons(repoDir2, module) {
-  const p = join3(repoDir2, MEM, "lessons", "approved.md");
+function approvedLessons(repoDir2, module, cfg) {
+  const p = join4(repoDir2, mem(cfg).approvedLessons);
   if (!existsSync3(p)) return "No hay lecciones aprobadas todav\xEDa.";
-  const text2 = readFileSync3(p, "utf8");
+  const text2 = readFileSync4(p, "utf8");
   if (!module) return text2;
   const sections = text2.split(/^## /m);
   const relevant = sections.filter((s, i) => i === 0 || s.toLowerCase().includes(module.toLowerCase()) || /^general/i.test(s));
   return relevant.map((s, i) => i === 0 ? s : `## ${s}`).join("");
+}
+
+// src/core/base.ts
+import { execFileSync as execFileSync2 } from "node:child_process";
+function revExists(repoDir2, rev) {
+  try {
+    execFileSync2("git", ["rev-parse", "--verify", "--quiet", `${rev}^{commit}`], { cwd: repoDir2, stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+function baseRev(repoDir2, cfg, lane) {
+  const branch = lane && cfg.lanes.base[lane] || cfg.baseBranch;
+  const remote = `${cfg.remote}/${branch}`;
+  return revExists(repoDir2, remote) ? remote : branch;
+}
+function mergeBase(repoDir2, cfg, lane) {
+  try {
+    return execFileSync2("git", ["merge-base", "HEAD", baseRev(repoDir2, cfg, lane)], { cwd: repoDir2, encoding: "utf8" }).trim();
+  } catch {
+    return "HEAD";
+  }
+}
+function fill(template, vars) {
+  return template.replace(/\{(\w+)\}/g, (m, k) => k in vars ? vars[k] : m);
 }
 
 // src/core/lane-policy.ts
@@ -38818,39 +38986,62 @@ function laneRequiresGate(lane) {
 }
 
 // src/core/risk.ts
-var import_picomatch = __toESM(require_picomatch2(), 1);
+var import_picomatch2 = __toESM(require_picomatch2(), 1);
+import { execSync } from "node:child_process";
 function matchesAny(file2, globs) {
   if (globs.length === 0) return false;
-  return (0, import_picomatch.default)(globs, { dot: true })(file2);
+  return (0, import_picomatch2.default)(globs, { dot: true })(file2);
 }
 var LIGHT_LANES = ["fast-feature", "chore"];
 function assessRisk(files, lane, cfg) {
   const criticalFiles = files.filter((f) => matchesAny(f, cfg.criticalPaths));
   const sharedFiles = files.filter((f) => matchesAny(f, cfg.sharedPaths));
-  const touchesCritical = criticalFiles.length > 0;
+  const level = criticalFiles.length ? "high" : files.length ? "medium" : "low";
+  return decide(level, criticalFiles, sharedFiles, lane, cfg, "rutas cr\xEDticas");
+}
+function decide(level, criticalFiles, sharedFiles, lane, cfg, source) {
+  const touchesCritical = level === "high";
   const touchesShared = sharedFiles.length > 0;
   const mustEscalate = touchesCritical && LIGHT_LANES.includes(lane);
   const extraFlows = touchesCritical || touchesShared ? [...cfg.criticalFlows] : [];
-  let reason = "El diff no toca rutas cr\xEDticas ni compartidas.";
+  let reason = `Riesgo ${level}: el diff no toca ${source}.`;
   if (mustEscalate) {
-    reason = `El carril "${lane}" toc\xF3 rutas cr\xEDticas (${criticalFiles.join(", ")}). Se escala a full-feature: hace falta spec aprobada y revisi\xF3n completa.`;
+    reason = `El carril "${lane}" dio riesgo ALTO (${criticalFiles.join(", ") || "ver salida"}). Se escala a full-feature: hace falta spec aprobada y revisi\xF3n completa.`;
   } else if (touchesCritical) {
-    reason = `Toca rutas cr\xEDticas (${criticalFiles.join(", ")}): se agregan los flujos cr\xEDticos al gate.`;
+    reason = `Riesgo ALTO (${criticalFiles.join(", ") || "ver salida"}): revisi\xF3n completa y, si aplica, OK humano antes de pushear.`;
   } else if (touchesShared) {
     reason = `Toca c\xF3digo compartido (${sharedFiles.join(", ")}): se agregan los flujos cr\xEDticos al gate.`;
   }
-  return {
-    criticalFiles,
-    sharedFiles,
-    mustEscalate,
-    escalateTo: mustEscalate ? "full-feature" : void 0,
-    extraFlows,
-    reason
-  };
+  return { level, criticalFiles, sharedFiles, mustEscalate, escalateTo: mustEscalate ? "full-feature" : void 0, extraFlows, reason };
+}
+function parseRiskOutput(output2, cfg) {
+  const a = cfg.adapters.risk;
+  const m = output2.match(new RegExp(a.levelRegex, "m"));
+  const raw = m?.[1]?.toLowerCase() ?? "";
+  const level = a.levels[raw];
+  if (!level) throw new Error(`No pude leer el nivel de riesgo de la salida del script:
+${output2.slice(0, 500)}`);
+  const fileRe = new RegExp(a.fileRegex);
+  const files = output2.split("\n").map((l) => l.match(fileRe)?.[1]).filter((x) => Boolean(x));
+  return { level, files };
+}
+function assessRiskFor(repoDir2, files, lane, cfg) {
+  if (!cfg.adapters.risk) return assessRisk(files, lane, cfg);
+  const cmd = fill(cfg.adapters.risk.command, { base: mergeBase(repoDir2, cfg, lane) });
+  let out;
+  try {
+    out = execSync(cmd, { cwd: repoDir2, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], shell: "/bin/bash" });
+  } catch (e) {
+    const err = e;
+    out = `${err.stdout ?? ""}${err.stderr ?? ""}` || err.message;
+  }
+  const { level, files: justifying } = parseRiskOutput(out, cfg);
+  const sharedFiles = files.filter((f) => matchesAny(f, cfg.sharedPaths));
+  return decide(level, level === "high" ? justifying : [], sharedFiles, lane, cfg, "rutas de riesgo alto");
 }
 
 // src/core/test-planner.ts
-import { relative } from "node:path";
+import { relative as relative2 } from "node:path";
 var DEFAULT_BUDGETS = {
   hotfix: 15,
   bugfix: 25,
@@ -38872,48 +39063,51 @@ function e2eGrep(flows, cfg) {
 function shellQuote(s) {
   return /^[\w@%+=:,./-]+$/.test(s) ? s : `'${s.replace(/'/g, `'\\''`)}'`;
 }
-function scopedSteps(level, files, cfg, reason) {
+function scopedSteps(level, list, files, reason, onlyCode) {
   const steps = [];
-  cfg.commands[level].forEach((sc, i) => {
-    const hit = files.filter((f) => matchesAny(f, sc.paths) && CODE_EXT.test(f));
+  list.forEach((sc, i) => {
+    const hit = files.filter((f) => matchesAny(f, sc.paths) && (!onlyCode || CODE_EXT.test(f)));
     if (hit.length === 0) return;
-    const rel = sc.relativeFiles ? hit.map((f) => relative(sc.cwd, f) || f) : hit;
+    const rel = sc.relativeFiles ? hit.map((f) => relative2(sc.cwd, f) || f) : hit;
     const cmd = sc.command.replace("{files}", rel.map(shellQuote).join(" "));
     steps.push({
       id: `${level}-${i}`,
       level,
       command: sc.cwd === "." ? cmd : `cd ${shellQuote(sc.cwd)} && ${cmd}`,
-      reason: `${reason} (${hit.length} archivo/s)`
+      reason: `${reason} (${sc.cwd === "." ? "" : sc.cwd + ", "}${hit.length} archivo/s)`
     });
   });
   return steps;
 }
-function simple(id, level, command, reason) {
-  return command ? [{ id, level, command, reason }] : [];
+function stepsFor(level, value, files, reason) {
+  if (!value) return [];
+  if (typeof value === "string") return [{ id: level, level, command: value, reason }];
+  return scopedSteps(level, value, files, reason, false);
 }
 function e2eStep(flows, cfg, reason) {
   if (!cfg.commands.e2e || flows.length === 0) return [];
   const grep = e2eGrep(flows, cfg);
-  return [
-    {
-      id: "e2e",
-      level: "e2e",
-      command: cfg.commands.e2e.replace("{grep}", shellQuote(grep)),
-      reason: `${reason}: ${flows.join(", ")}`
-    }
-  ];
+  return [{ id: "e2e", level: "e2e", command: cfg.commands.e2e.replace("{grep}", shellQuote(grep)), reason: `${reason}: ${flows.join(", ")}` }];
 }
-function planTests(files, lane, cfg, risk) {
+function base(lane, cfg) {
+  return {
+    lane,
+    deferred: ["Suite e2e completa (nightly, post-deploy o revisi\xF3n por lote)"],
+    budgetMinutes: cfg.budgets[lane]?.gateMinutes ?? DEFAULT_BUDGETS[lane] ?? 30
+  };
+}
+function planTests(files, lane, cfg, risk, impact) {
+  if (impact) return planFromImpact(files, lane, cfg, impact, risk);
   const c = cfg.commands;
   const affectedFlows = flowsFor(files, cfg);
   const extraFlows = risk?.extraFlows ?? [];
   const notes = [];
   const onlyDocs = files.length > 0 && files.every((f) => /\.(md|mdx|txt)$/i.test(f) || f.startsWith("docs/"));
-  const build = simple("build", "build", c.build, "Compila");
-  const lint = simple("lint", "lint", c.lint, "Linter");
-  const typecheck = simple("typecheck", "typecheck", c.typecheck, "Tipos");
-  const unit = scopedSteps("unit", files, cfg, "Unit de archivos afectados");
-  const integration = scopedSteps("integration", files, cfg, "Integraci\xF3n del m\xF3dulo");
+  const build = stepsFor("build", c.build, files, "Compila");
+  const lint = stepsFor("lint", c.lint, files, "Linter");
+  const typecheck = stepsFor("typecheck", c.typecheck, files, "Tipos");
+  const unit = scopedSteps("unit", c.unit, files, "Unit de archivos afectados", true);
+  const integration = scopedSteps("integration", c.integration, files, "Integraci\xF3n del m\xF3dulo", true);
   let inner = [];
   let gate = [];
   switch (lane) {
@@ -38932,7 +39126,7 @@ function planTests(files, lane, cfg, risk) {
         ...lint,
         ...typecheck,
         ...unit,
-        ...simple("visual", "visual", c.visual, "Regresi\xF3n visual"),
+        ...c.visual ? [{ id: "visual", level: "visual", command: c.visual, reason: "Regresi\xF3n visual" }] : [],
         ...e2eStep(uniq([...affectedFlows, ...extraFlows]), cfg, "Smoke de las pantallas afectadas")
       ];
       break;
@@ -38956,13 +39150,63 @@ function planTests(files, lane, cfg, risk) {
   if (gate.some((s) => s.level === "e2e" || s.level === "integration") && c.servicesUp) {
     gate.unshift({ id: "services", level: "integration", command: c.servicesUp, reason: "Levanta servicios para tests (Postgres, Redis)" });
   }
+  return { ...base(lane, cfg), inner: dedupe(inner), gate: dedupe(gate), notes, pendingForReview: [], fullSuiteRecommended: false };
+}
+function planFromImpact(files, lane, cfg, impact, risk) {
+  const c = cfg.commands;
+  const t = cfg.adapters.testPlan;
+  const notes = [];
+  const pending = [];
+  const lint = stepsFor("lint", c.lint, files, "Linter");
+  const typecheck = stepsFor("typecheck", c.typecheck, files, "Tipos");
+  const jest = t.jest && impact.jest.length ? [{ id: "jest", level: "unit", command: t.jest.replace("{patterns}", impact.jest.map(shellQuote).join(" ")), reason: `Jest afectados (${impact.jest.length} patr\xF3n/es)` }] : [];
+  const nodeClient = t.nodeTestClient && impact.nodeTestClient.length ? [{ id: "node-client", level: "unit", command: t.nodeTestClient.replace("{files}", impact.nodeTestClient.map(shellQuote).join(" ")), reason: `node --test del client (${impact.nodeTestClient.length})` }] : [];
+  const harness = impact.nodeTestHarness;
+  const harnessList = Array.isArray(harness) ? harness : [];
+  const nodeHarness = t.nodeTestHarness && (harness === true || harnessList.length) ? [{ id: "node-harness", level: "unit", command: t.nodeTestHarness.replace("{files}", harnessList.map(shellQuote).join(" ")), reason: "node --test del harness e2e" }] : [];
+  let e2e = [];
+  if (impact.e2e.length) {
+    if (c.e2eSpecs) {
+      e2e = [{ id: "e2e", level: "e2e", command: c.e2eSpecs.replace("{specs}", impact.e2e.map((s) => shellQuote(s.spec)).join(" ")), reason: `E2E afectados (${impact.e2e.length})` }];
+    } else {
+      pending.push(`E2E afectados (${impact.e2e.length}): ${impact.e2e.map((s) => s.nombre).join(", ")}`);
+    }
+  }
+  if (impact.suiteCompleta) {
+    pending.push(`SUITE COMPLETA RECOMENDADA: ${impact.motivosSuiteCompleta.join("; ")}`);
+  }
+  let inner = [];
+  let gate = [];
+  switch (lane) {
+    case "hotfix":
+      inner = [...jest];
+      gate = [...typecheck, ...jest, ...nodeClient, ...e2e];
+      notes.push("Hotfix: la suite e2e completa corre despu\xE9s del deploy, no bloquea el fix.");
+      break;
+    case "fast-feature":
+      inner = [...typecheck, ...nodeClient];
+      gate = [...lint, ...typecheck, ...jest, ...nodeClient, ...nodeHarness, ...e2e];
+      break;
+    case "chore":
+      inner = [...lint];
+      gate = [...lint, ...typecheck, ...jest, ...nodeClient, ...nodeHarness];
+      break;
+    case "query":
+    case "human-triage":
+      notes.push("Este carril no produce c\xF3digo: no hay gate.");
+      break;
+    default:
+      inner = [...typecheck, ...jest];
+      gate = [...lint, ...typecheck, ...jest, ...nodeClient, ...nodeHarness, ...e2e];
+  }
+  if (risk && risk.level === "high") notes.push(risk.reason);
   return {
-    lane,
+    ...base(lane, cfg),
     inner: dedupe(inner),
     gate: dedupe(gate),
-    deferred: ["Suite e2e completa (nightly o post-deploy)"],
-    budgetMinutes: cfg.budgets[lane]?.gateMinutes ?? DEFAULT_BUDGETS[lane] ?? 30,
-    notes
+    notes,
+    pendingForReview: pending,
+    fullSuiteRecommended: impact.suiteCompleta
   };
 }
 function uniq(xs) {
@@ -38974,25 +39218,51 @@ function dedupe(steps) {
 }
 
 // src/core/gate.ts
+function harnessOwnPrefixes(cfg) {
+  return [".harness/run/", ".harness/memory/", `${cfg.memory.episodesDir}/${cfg.memory.filePrefix}`, `${cfg.memory.incidentsDir}/${cfg.memory.filePrefix}`, cfg.memory.pendingLessonsDir + "/"];
+}
+function ticketFiles(repoDir2, cfg, lane) {
+  const own2 = harnessOwnPrefixes(cfg);
+  return changedFiles(repoDir2, baseRev(repoDir2, cfg, lane)).filter((f) => !own2.some((p) => f.startsWith(p)));
+}
 function requireTicket(repoDir2, ticketId) {
   const s = loadState(repoDir2, ticketId);
   if (!s) throw new Error(`No existe el ticket ${ticketId}. Llam\xE1 a start_ticket.`);
   if (!s.lane) throw new Error(`El ticket ${ticketId} no tiene carril. Llam\xE1 a select_lane.`);
   return s;
 }
-function changeLane(repoDir2, s, lane, reason) {
+function changeLane(repoDir2, s, lane, reason, cfg) {
   s.lane = lane;
   s.laneHistory.push({ lane, reason, at: (/* @__PURE__ */ new Date()).toISOString() });
   s.gatePassed = void 0;
+  if (cfg.lanes.delegate[lane]) s.status = "delegated";
   saveState(repoDir2, s);
   appendJournal(repoDir2, s.ticketId, { kind: "escalation", text: `Carril \u2192 ${lane}: ${reason}` });
+}
+function runImpact(repoDir2, cfg, lane) {
+  const t = cfg.adapters.testPlan;
+  if (!t) return void 0;
+  const cmd = fill(t.command, { base: baseRev(repoDir2, cfg, lane), mergeBase: mergeBase(repoDir2, cfg, lane) });
+  const out = execSync2(cmd, { cwd: repoDir2, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], maxBuffer: 64 * 1024 * 1024, shell: "/bin/bash" });
+  const start = out.indexOf("{");
+  if (start < 0) throw new Error(`El an\xE1lisis de impacto no devolvi\xF3 JSON:
+${out.slice(0, 500)}`);
+  return JSON.parse(out.slice(start));
 }
 function currentPlan(repoDir2, ticketId) {
   const cfg = loadConfig(repoDir2);
   const s = requireTicket(repoDir2, ticketId);
-  const files = changedFiles(repoDir2, cfg.baseBranch);
-  const risk = assessRisk(files, s.lane, cfg);
-  return { plan: planTests(files, s.lane, cfg, risk), files, cfg };
+  const files = ticketFiles(repoDir2, cfg, s.lane);
+  const risk = assessRiskFor(repoDir2, files, s.lane, cfg);
+  const impact = files.length ? runImpactSafe(repoDir2, cfg, s.lane) : void 0;
+  return { plan: planTests(files, s.lane, cfg, risk, impact), files, risk, cfg };
+}
+function runImpactSafe(repoDir2, cfg, lane) {
+  try {
+    return runImpact(repoDir2, cfg, lane);
+  } catch {
+    return void 0;
+  }
 }
 async function runInner(repoDir2, ticketId) {
   const { plan } = currentPlan(repoDir2, ticketId);
@@ -39005,102 +39275,123 @@ async function runGate(repoDir2, ticketId, summary) {
   const cfg = loadConfig(repoDir2);
   const s = requireTicket(repoDir2, ticketId);
   const max = cfg.gate.maxAttempts;
-  const hash2 = diffHash(repoDir2, cfg.baseBranch);
-  const base = { maxAttempts: max, diffHash: hash2, results: [] };
-  if (!laneRequiresGate(s.lane)) {
-    return { ...base, passed: true, escalated: false, attempt: s.gateAttempts, message: `El carril ${s.lane} no requiere gate.` };
+  const hash2 = diffHash(repoDir2, baseRev(repoDir2, cfg, s.lane), harnessOwnPrefixes(cfg));
+  const base2 = { maxAttempts: max, diffHash: hash2, results: [] };
+  const fail = (message, extra = {}) => ({ ...base2, passed: false, escalated: false, attempt: s.gateAttempts, message, ...extra });
+  if (!laneRequiresGate(s.lane) || s.status === "delegated") {
+    return { ...base2, passed: true, escalated: false, attempt: s.gateAttempts, message: `El carril ${s.lane} no pasa por este gate.` };
   }
-  if (s.status === "escalated") {
-    return { ...base, passed: false, escalated: true, attempt: s.gateAttempts, message: "El ticket ya fue escalado a un humano. No sigas intentando." };
+  if (s.status === "escalated") return fail("El ticket ya fue escalado a un humano. No sigas intentando.", { escalated: true });
+  const files = ticketFiles(repoDir2, cfg, s.lane);
+  if (files.length === 0) return fail(`No hay cambios respecto de la rama base (${baseRev(repoDir2, cfg, s.lane)}).`);
+  if (cfg.adapters.testPlan && cfg.gate.requireCommitted) {
+    const dirty = uncommitted(repoDir2, harnessOwnPrefixes(cfg));
+    if (dirty.length) return fail(`El an\xE1lisis de impacto del repo mira commits: commite\xE1 el trabajo antes del gate (aunque sea un commit WIP). Sin commitear: ${dirty.slice(0, 10).join(", ")}`);
   }
-  const files = changedFiles(repoDir2, cfg.baseBranch).filter((f) => !f.startsWith(".harness/memory/"));
-  if (files.length === 0) {
-    return { ...base, passed: false, escalated: false, attempt: s.gateAttempts, message: "No hay cambios respecto de la rama base." };
+  const risk = assessRiskFor(repoDir2, files, s.lane, cfg);
+  let impact;
+  try {
+    impact = runImpact(repoDir2, cfg, s.lane);
+  } catch (e) {
+    return fail(`Fall\xF3 el an\xE1lisis de impacto del repo: ${e.message}`);
   }
-  const risk = assessRisk(files, s.lane, cfg);
-  if (risk.mustEscalate && risk.escalateTo) {
-    changeLane(repoDir2, s, risk.escalateTo, risk.reason);
-    return {
-      ...base,
-      passed: false,
-      escalated: false,
-      attempt: s.gateAttempts,
-      message: `RE-CARRIL: ${risk.reason}
+  const globalChange = Boolean(impact?.suiteCompleta) && LIGHT_LANES.includes(s.lane);
+  if (risk.mustEscalate || globalChange) {
+    const reason = risk.mustEscalate ? risk.reason : `El carril "${s.lane}" toc\xF3 algo global (${impact.motivosSuiteCompleta.slice(0, 3).join("; ")}): no es un cambio de riesgo bajo.`;
+    changeLane(repoDir2, s, "full-feature", reason, cfg);
+    const delegated = cfg.lanes.delegate["full-feature"];
+    return fail(
+      delegated ? `RE-CARRIL: ${reason}
+El ticket pasa al flujo "${delegated}" del repo (ver CLAUDE.md/AGENTS.md). Este gate ya no aplica.` : `RE-CARRIL: ${reason}
 Segu\xED la skill lane-full-feature desde el paso de spec (necesita aprobaci\xF3n humana) antes de volver a correr el gate.`
-    };
+    );
   }
-  const plan = planTests(files, s.lane, cfg, risk);
+  const plan = planTests(files, s.lane, cfg, risk, impact);
   s.gateAttempts += 1;
   saveState(repoDir2, s);
   const results = await runSteps(plan.gate, repoDir2, plan.budgetMinutes);
   const passed = results.length === plan.gate.length && results.every((r) => r.ok);
   const timedOut = results.some((r) => r.timedOut);
-  const report = summarize(results);
-  appendJournal(repoDir2, ticketId, { kind: "gate", text: `Intento ${s.gateAttempts}/${max}: ${passed ? "PAS\xD3" : "FALL\xD3"}` });
+  const report = summarize(results) || "(no hubo pasos que correr para este diff)";
+  const pending = plan.pendingForReview.length ? `
+
+PENDIENTE PARA EL REVISOR / LOTE (el gate no lo corre):
+- ${plan.pendingForReview.join("\n- ")}` : "";
+  const riskLine = `
+Riesgo: ${risk.level}${risk.level === "high" && cfg.guard.humanOkForHighRiskPush ? " \u2192 el push necesita OK humano (record_human_ok)" : ""}.`;
+  appendJournal(repoDir2, ticketId, { kind: "gate", text: `Intento ${s.gateAttempts}/${max}: ${passed ? "PAS\xD3" : "FALL\xD3"} (riesgo ${risk.level})` });
   if (passed) {
     s.gatePassed = { diffHash: hash2, at: (/* @__PURE__ */ new Date()).toISOString() };
     s.status = "gate-passed";
     s.summary = summary.fix;
+    s.risk = risk.level;
     saveState(repoDir2, s);
-    const episode = writeEpisode(repoDir2, {
-      ticketId,
-      title: s.title,
-      lane: s.laneHistory[0]?.lane ?? s.lane,
-      finalLane: s.lane,
-      outcome: "merged-pending-review",
-      modules: s.triage?.modules ?? [],
-      files,
-      commit: headSha(repoDir2),
-      attempts: s.gateAttempts,
-      symptom: summary.symptom,
-      rootCause: summary.rootCause,
-      fix: summary.fix,
-      notWorked: summary.notWorked ?? "",
-      date: (/* @__PURE__ */ new Date()).toISOString()
-    }, s.lane === "hotfix" ? "incidents" : "episodes");
+    const episode = writeEpisode(
+      repoDir2,
+      {
+        ticketId,
+        title: s.title,
+        lane: s.laneHistory[0]?.lane ?? s.lane,
+        finalLane: s.lane,
+        outcome: "merged-pending-review",
+        modules: s.triage?.modules ?? [],
+        files,
+        commit: headSha(repoDir2),
+        attempts: s.gateAttempts,
+        symptom: summary.symptom,
+        rootCause: summary.rootCause,
+        fix: summary.fix,
+        notWorked: summary.notWorked ?? "",
+        date: (/* @__PURE__ */ new Date()).toISOString()
+      },
+      s.lane === "hotfix" ? "incidents" : "episodes",
+      cfg
+    );
     return {
-      ...base,
+      ...base2,
       results,
       passed: true,
       escalated: false,
       attempt: s.gateAttempts,
       message: `GATE OK.
-${report}
+${report}${riskLine}${pending}
 
-Episodio guardado en ${episode.replace(repoDir2 + "/", "")}: incluilo en el commit del PR.${plan.notes.length ? "\nNotas: " + plan.notes.join(" ") : ""}`
+Episodio guardado en ${episode.replace(repoDir2 + "/", "")}: incluilo en el commit.${plan.notes.length ? "\nNotas: " + plan.notes.join(" ") : ""}`
     };
   }
   if (s.gateAttempts >= max) {
     s.status = "escalated";
     saveState(repoDir2, s);
     appendJournal(repoDir2, ticketId, { kind: "escalation", text: `Gate fall\xF3 ${max} veces: escalado a humano.` });
-    return {
-      ...base,
-      results,
-      passed: false,
-      escalated: true,
-      attempt: s.gateAttempts,
-      message: `GATE FALL\xD3 (${s.gateAttempts}/${max}). Se escala a un humano: dej\xE1 un resumen de lo que probaste y fren\xE1.
+    return { ...base2, results, passed: false, escalated: true, attempt: s.gateAttempts, message: `GATE FALL\xD3 (${s.gateAttempts}/${max}). Se escala a un humano: dej\xE1 un resumen de lo que probaste y fren\xE1.
 
-${report}`
-    };
+${report}` };
   }
   const hint = timedOut ? "\nSe agot\xF3 el presupuesto de tiempo del carril: puede que el ticket est\xE9 mal clasificado. Si el cambio es m\xE1s grande de lo esperado, decilo en el resumen." : "";
-  return {
-    ...base,
-    results,
-    passed: false,
-    escalated: false,
-    attempt: s.gateAttempts,
-    message: `GATE FALL\xD3 (intento ${s.gateAttempts}/${max}). Correg\xED y volv\xE9 a llamar run_gate.${hint}
+  return { ...base2, results, passed: false, escalated: false, attempt: s.gateAttempts, message: `GATE FALL\xD3 (intento ${s.gateAttempts}/${max}). Correg\xED y volv\xE9 a llamar run_gate.${hint}
 
-${report}`
-  };
+${report}` };
+}
+
+// src/core/human-ok.ts
+import { existsSync as existsSync4, mkdirSync as mkdirSync3, readFileSync as readFileSync5, writeFileSync as writeFileSync3 } from "node:fs";
+import { dirname as dirname2, join as join5 } from "node:path";
+import { execFileSync as execFileSync3 } from "node:child_process";
+var FILE = ".harness/run/ok-humano.json";
+function head(repoDir2) {
+  return execFileSync3("git", ["rev-parse", "HEAD"], { cwd: repoDir2, encoding: "utf8" }).trim();
+}
+function writeHumanOk(repoDir2, approvedBy, quote) {
+  const ok = { head: head(repoDir2), approvedBy, quote, at: (/* @__PURE__ */ new Date()).toISOString() };
+  const p = join5(repoDir2, FILE);
+  mkdirSync3(dirname2(p), { recursive: true });
+  writeFileSync3(p, JSON.stringify(ok, null, 2));
+  return ok;
 }
 
 // src/mcp/server.ts
 var repoDir = process.env.DEV_HARNESS_REPO || process.cwd();
-var server = new McpServer({ name: "harness", version: "1.0.0" });
+var server = new McpServer({ name: "harness", version: "0.2.0" });
 function text(t, isError = false) {
   return { content: [{ type: "text", text: t }], ...isError ? { isError: true } : {} };
 }
@@ -39135,12 +39426,15 @@ server.registerTool(
     }
   },
   safe(({ ticketId, title, body, source }) => {
+    const cfg = loadConfig(repoDir);
     const s = createState(repoDir, ticketId, title, source);
     setActiveTicket(repoDir, ticketId);
-    const similar = searchMemory(repoDir, `${title} ${body}`, { limit: 3, existingFiles: (f) => existsSync4(join4(repoDir, f)) });
+    const similar = searchMemory(repoDir, `${title} ${body}`, { limit: 5, cfg, existingFiles: (f) => existsSync5(join6(repoDir, f)) });
     return json2({
       ticket: { id: s.ticketId, status: s.status, lane: s.lane ?? null, gateAttempts: s.gateAttempts },
       resumed: s.laneHistory.length > 0,
+      agents: agentMap(cfg),
+      delegatedLanes: cfg.lanes.delegate,
       similarPastTickets: similar,
       hint: similar.length > 0 ? "Revis\xE1 si alguno es duplicado o si su causa ra\xEDz aplica. Pasale estos resultados al subagente triage." : "No hay tickets parecidos en la memoria."
     });
@@ -39164,13 +39458,26 @@ server.registerTool(
     const id = ticketOrActive(ticketId);
     const cfg = loadConfig(repoDir);
     const { lane, reason } = selectLane(triage, cfg.triage.minConfidence);
+    const delegatedTo = cfg.lanes.delegate[lane];
     const s = updateState(repoDir, id, (st) => {
       st.triage = triage;
       st.lane = lane;
       st.laneHistory.push({ lane, reason, at: (/* @__PURE__ */ new Date()).toISOString() });
+      if (delegatedTo) {
+        st.status = "delegated";
+        st.delegatedTo = delegatedTo;
+      }
     });
-    appendJournal(repoDir, id, { kind: "decision", text: `Carril ${lane}: ${reason}` });
-    return json2({ lane, reason, nextSkill: lane === "human-triage" ? null : `lane-${lane}`, ticket: s.ticketId });
+    appendJournal(repoDir, id, { kind: "decision", text: `Carril ${lane}: ${reason}${delegatedTo ? ` \u2192 flujo del repo: ${delegatedTo}` : ""}` });
+    return json2({
+      lane,
+      reason,
+      delegatedTo: delegatedTo ?? null,
+      nextSkill: delegatedTo || lane === "human-triage" ? null : `lane-${lane}`,
+      instructions: delegatedTo ? `Este carril lo resuelve el flujo propio del repo: "${delegatedTo}". Segu\xED CLAUDE.md/AGENTS.md del repo; el gate de dev-harness no aplica, pero las guardas s\xED.` : void 0,
+      agents: agentMap(cfg),
+      ticket: s.ticketId
+    });
   })
 );
 server.registerTool(
@@ -39211,8 +39518,8 @@ server.registerTool(
     const id = ticketOrActive(ticketId);
     const cfg = loadConfig(repoDir);
     const s = loadState(repoDir, id);
-    const files = changedFiles(repoDir, cfg.baseBranch);
-    return json2({ lane: s?.lane, files, risk: assessRisk(files, s?.lane ?? "bugfix", cfg) });
+    const files = changedFiles(repoDir, baseRev(repoDir, cfg, s?.lane));
+    return json2({ lane: s?.lane, files, risk: assessRiskFor(repoDir, files, s?.lane ?? "bugfix", cfg) });
   })
 );
 server.registerTool(
@@ -39221,7 +39528,10 @@ server.registerTool(
     description: "Muestra qu\xE9 tests correr\xEDan en el loop interno y en el gate para el diff actual (test impact analysis). No corre nada.",
     inputSchema: optionalTicket
   },
-  safe(({ ticketId }) => json2(currentPlan(repoDir, ticketOrActive(ticketId)).plan))
+  safe(({ ticketId }) => {
+    const { plan, risk, files } = currentPlan(repoDir, ticketOrActive(ticketId));
+    return json2({ files, risk, plan });
+  })
 );
 server.registerTool(
   "run_checks",
@@ -39262,9 +39572,9 @@ server.registerTool(
   safe(async ({ url: url2, name }) => {
     const cfg = loadConfig(repoDir);
     if (!cfg.commands.screenshot) return text("No hay commands.screenshot en .harness/config.json.", true);
-    const dir = join4(repoDir, ".harness/run/screenshots");
-    mkdirSync3(dir, { recursive: true });
-    const out = join4(dir, `${name}.png`);
+    const dir = join6(repoDir, ".harness/run/screenshots");
+    mkdirSync4(dir, { recursive: true });
+    const out = join6(dir, `${name}.png`);
     const cmd = cfg.commands.screenshot.replace("{url}", JSON.stringify(url2)).replace("{out}", JSON.stringify(out));
     const r = await runStep({ id: "shot", level: "visual", command: cmd, reason: "screenshot" }, repoDir, 12e4);
     return r.ok ? text(`Screenshot: ${out}`) : text(`No se pudo sacar el screenshot:
@@ -39296,7 +39606,7 @@ server.registerTool(
     inputSchema: { query: external_exports.string(), module: external_exports.string().optional(), limit: external_exports.number().int().min(1).max(10).default(3) }
   },
   safe(
-    ({ query, module, limit }) => json2(searchMemory(repoDir, query, { module, limit, existingFiles: (f) => existsSync4(join4(repoDir, f)) }))
+    ({ query, module, limit }) => json2(searchMemory(repoDir, query, { module, limit, cfg: loadConfig(repoDir), existingFiles: (f) => existsSync5(join6(repoDir, f)) }))
   )
 );
 server.registerTool(
@@ -39305,7 +39615,7 @@ server.registerTool(
     description: "Lecciones APROBADAS por humanos (reglas aprendidas). Filtr\xE1 por m\xF3dulo.",
     inputSchema: { module: external_exports.string().optional() }
   },
-  safe(({ module }) => text(approvedLessons(repoDir, module)))
+  safe(({ module }) => text(approvedLessons(repoDir, module, loadConfig(repoDir))))
 );
 server.registerTool(
   "propose_lesson",
@@ -39314,8 +39624,24 @@ server.registerTool(
     inputSchema: { ...optionalTicket, title: external_exports.string(), rule: external_exports.string(), evidence: external_exports.string(), module: external_exports.string().optional() }
   },
   safe(({ ticketId, ...lesson }) => {
-    const file2 = proposeLesson(repoDir, { ...lesson, ticketId: ticketId || getActiveTicket(repoDir) });
+    const file2 = proposeLesson(repoDir, { ...lesson, ticketId: ticketId || getActiveTicket(repoDir) }, loadConfig(repoDir));
     return text(`Lecci\xF3n pendiente en ${file2.replace(repoDir + "/", "")}. Incluila en el PR para que la revise un humano.`);
+  })
+);
+server.registerTool(
+  "record_human_ok",
+  {
+    description: "Registra el OK EXPL\xCDCITO del usuario para pushear un cambio de riesgo alto, atado al commit actual (HEAD). Solo llamalo despu\xE9s de que el usuario lo haya dicho en la conversaci\xF3n. Si despu\xE9s cambia el c\xF3digo, hace falta un OK nuevo.",
+    inputSchema: {
+      approvedBy: external_exports.string().describe("Qui\xE9n dio el OK"),
+      quote: external_exports.string().describe("Lo que dijo el usuario, textual")
+    }
+  },
+  safe(({ approvedBy, quote }) => {
+    const ok = writeHumanOk(repoDir, approvedBy, quote);
+    const id = getActiveTicket(repoDir);
+    if (id) appendJournal(repoDir, id, { kind: "decision", text: `OK humano de ${approvedBy} para ${ok.head.slice(0, 8)}: "${quote}"` });
+    return text(`OK humano registrado para ${headSha(repoDir)} (${approvedBy}). Anotalo tambi\xE9n donde lo pida el flujo del repo.`);
   })
 );
 server.registerTool(

@@ -12,12 +12,14 @@ import { join } from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { hasConfig, loadConfig } from "../core/config.js";
+import { agentMap, hasConfig, loadConfig } from "../core/config.js";
 import { runStep } from "../core/exec.js";
 import { currentPlan, runGate, runInner } from "../core/gate.js";
-import { changedFiles } from "../core/git.js";
+import { baseRev } from "../core/base.js";
+import { changedFiles, headSha } from "../core/git.js";
+import { writeHumanOk } from "../core/human-ok.js";
 import { selectLane } from "../core/lane-policy.js";
-import { assessRisk } from "../core/risk.js";
+import { assessRiskFor } from "../core/risk.js";
 import { approvedLessons, proposeLesson, searchMemory } from "../memory/episodes.js";
 import {
   appendJournal,
@@ -31,7 +33,7 @@ import {
 
 const repoDir = process.env.DEV_HARNESS_REPO || process.cwd();
 
-const server = new McpServer({ name: "harness", version: "1.0.0" });
+const server = new McpServer({ name: "harness", version: "0.2.0" });
 
 type Content = { content: { type: "text"; text: string }[]; isError?: boolean };
 
@@ -78,12 +80,15 @@ server.registerTool(
     },
   },
   safe(({ ticketId, title, body, source }) => {
+    const cfg = loadConfig(repoDir);
     const s = createState(repoDir, ticketId, title, source);
     setActiveTicket(repoDir, ticketId);
-    const similar = searchMemory(repoDir, `${title} ${body}`, { limit: 3, existingFiles: (f) => existsSync(join(repoDir, f)) });
+    const similar = searchMemory(repoDir, `${title} ${body}`, { limit: 5, cfg, existingFiles: (f) => existsSync(join(repoDir, f)) });
     return json({
       ticket: { id: s.ticketId, status: s.status, lane: s.lane ?? null, gateAttempts: s.gateAttempts },
       resumed: s.laneHistory.length > 0,
+      agents: agentMap(cfg),
+      delegatedLanes: cfg.lanes.delegate,
       similarPastTickets: similar,
       hint:
         similar.length > 0
@@ -112,13 +117,28 @@ server.registerTool(
     const id = ticketOrActive(ticketId);
     const cfg = loadConfig(repoDir);
     const { lane, reason } = selectLane(triage, cfg.triage.minConfidence);
+    const delegatedTo = cfg.lanes.delegate[lane];
     const s = updateState(repoDir, id, (st) => {
       st.triage = triage;
       st.lane = lane;
       st.laneHistory.push({ lane, reason, at: new Date().toISOString() });
+      if (delegatedTo) {
+        st.status = "delegated";
+        st.delegatedTo = delegatedTo;
+      }
     });
-    appendJournal(repoDir, id, { kind: "decision", text: `Carril ${lane}: ${reason}` });
-    return json({ lane, reason, nextSkill: lane === "human-triage" ? null : `lane-${lane}`, ticket: s.ticketId });
+    appendJournal(repoDir, id, { kind: "decision", text: `Carril ${lane}: ${reason}${delegatedTo ? ` → flujo del repo: ${delegatedTo}` : ""}` });
+    return json({
+      lane,
+      reason,
+      delegatedTo: delegatedTo ?? null,
+      nextSkill: delegatedTo || lane === "human-triage" ? null : `lane-${lane}`,
+      instructions: delegatedTo
+        ? `Este carril lo resuelve el flujo propio del repo: "${delegatedTo}". Seguí CLAUDE.md/AGENTS.md del repo; el gate de dev-harness no aplica, pero las guardas sí.`
+        : undefined,
+      agents: agentMap(cfg),
+      ticket: s.ticketId,
+    });
   }),
 );
 
@@ -167,8 +187,8 @@ server.registerTool(
     const id = ticketOrActive(ticketId);
     const cfg = loadConfig(repoDir);
     const s = loadState(repoDir, id);
-    const files = changedFiles(repoDir, cfg.baseBranch);
-    return json({ lane: s?.lane, files, risk: assessRisk(files, s?.lane ?? "bugfix", cfg) });
+    const files = changedFiles(repoDir, baseRev(repoDir, cfg, s?.lane));
+    return json({ lane: s?.lane, files, risk: assessRiskFor(repoDir, files, s?.lane ?? "bugfix", cfg) });
   }),
 );
 
@@ -178,7 +198,10 @@ server.registerTool(
     description: "Muestra qué tests correrían en el loop interno y en el gate para el diff actual (test impact analysis). No corre nada.",
     inputSchema: optionalTicket,
   },
-  safe(({ ticketId }) => json(currentPlan(repoDir, ticketOrActive(ticketId)).plan)),
+  safe(({ ticketId }) => {
+    const { plan, risk, files } = currentPlan(repoDir, ticketOrActive(ticketId));
+    return json({ files, risk, plan });
+  }),
 );
 
 server.registerTool(
@@ -261,7 +284,7 @@ server.registerTool(
     inputSchema: { query: z.string(), module: z.string().optional(), limit: z.number().int().min(1).max(10).default(3) },
   },
   safe(({ query, module, limit }) =>
-    json(searchMemory(repoDir, query, { module, limit, existingFiles: (f) => existsSync(join(repoDir, f)) })),
+    json(searchMemory(repoDir, query, { module, limit, cfg: loadConfig(repoDir), existingFiles: (f) => existsSync(join(repoDir, f)) })),
   ),
 );
 
@@ -271,7 +294,7 @@ server.registerTool(
     description: "Lecciones APROBADAS por humanos (reglas aprendidas). Filtrá por módulo.",
     inputSchema: { module: z.string().optional() },
   },
-  safe(({ module }) => text(approvedLessons(repoDir, module))),
+  safe(({ module }) => text(approvedLessons(repoDir, module, loadConfig(repoDir)))),
 );
 
 server.registerTool(
@@ -282,8 +305,26 @@ server.registerTool(
     inputSchema: { ...optionalTicket, title: z.string(), rule: z.string(), evidence: z.string(), module: z.string().optional() },
   },
   safe(({ ticketId, ...lesson }) => {
-    const file = proposeLesson(repoDir, { ...lesson, ticketId: ticketId || getActiveTicket(repoDir) });
+    const file = proposeLesson(repoDir, { ...lesson, ticketId: ticketId || getActiveTicket(repoDir) }, loadConfig(repoDir));
     return text(`Lección pendiente en ${file.replace(repoDir + "/", "")}. Incluila en el PR para que la revise un humano.`);
+  }),
+);
+
+server.registerTool(
+  "record_human_ok",
+  {
+    description:
+      "Registra el OK EXPLÍCITO del usuario para pushear un cambio de riesgo alto, atado al commit actual (HEAD). Solo llamalo después de que el usuario lo haya dicho en la conversación. Si después cambia el código, hace falta un OK nuevo.",
+    inputSchema: {
+      approvedBy: z.string().describe("Quién dio el OK"),
+      quote: z.string().describe("Lo que dijo el usuario, textual"),
+    },
+  },
+  safe(({ approvedBy, quote }) => {
+    const ok = writeHumanOk(repoDir, approvedBy, quote);
+    const id = getActiveTicket(repoDir);
+    if (id) appendJournal(repoDir, id, { kind: "decision", text: `OK humano de ${approvedBy} para ${ok.head.slice(0, 8)}: "${quote}"` });
+    return text(`OK humano registrado para ${headSha(repoDir)} (${approvedBy}). Anotalo también donde lo pida el flujo del repo.`);
   }),
 );
 

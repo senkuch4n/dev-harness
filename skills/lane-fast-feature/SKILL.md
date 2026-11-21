@@ -4,6 +4,9 @@ description: Carril para features de bajo riesgo (visuales, de texto o de diseñ
 ---
 # Carril fast-feature
 
+> **Roles, no nombres.** Los subagentes de este playbook son roles. Usá el nombre real que devolvieron `start_ticket`/`select_lane` en `agents` (por ejemplo, el rol `reviewer` puede ser el revisor propio del repo). Si el repo tiene su `CLAUDE.md`/`AGENTS.md` con reglas para un rol (modelo, skills obligatorias, regla de la base de datos), esas reglas mandan.
+
+
 Un cambio chico no necesita un equipo: un agente ReAct y un evaluador visual alcanzan.
 
 ## Loop evaluator–optimizer (máximo 3 vueltas)
@@ -14,7 +17,8 @@ Un cambio chico no necesita un equipo: un agente ReAct y un evaluador visual alc
 5. Si después de 3 vueltas sigue sin aprobar, explicá qué falta y llamá a `close_ticket` (escalated).
 
 ## Cierre
-- `run_gate` corre lint, tipos, unit afectados, regresión visual y el smoke de las pantallas tocadas. **No corre la suite e2e completa.**
+- `run_gate` corre lint, tipos, unit afectados, regresión visual y el smoke de las pantallas tocadas. **No corre la suite e2e completa.** Si te pide commitear antes, hacé un commit de trabajo.
+- Si el gate lista **PENDIENTE PARA EL REVISOR** (por ejemplo specs e2e afectados), lanzá el rol `reviewer` pasándole esa lista, el ticket y las capturas. Tiene que dar su aprobación antes del PR/MR.
 - Si `run_gate` responde **RE-CARRIL** (el cambio tocó algo crítico), no lo fuerces: seguí la skill `lane-full-feature`.
 - PR: skill `open-pr`. Adjuntá los screenshots de `.harness/run/screenshots/` en la descripción.
 

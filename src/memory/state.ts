@@ -2,7 +2,7 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeF
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { repoKey } from "../core/git.js";
-import type { Lane, TriageResult } from "../core/types.js";
+import type { Lane, Risk, TriageResult } from "../core/types.js";
 
 /**
  * MEMORIA DE TRABAJO (el "pizarrón").
@@ -13,7 +13,7 @@ import type { Lane, TriageResult } from "../core/types.js";
  * En cada worktree, .harness/run/active.json dice qué ticket se está trabajando.
  */
 
-export type TicketStatus = "open" | "gate-passed" | "escalated" | "answered" | "closed";
+export type TicketStatus = "open" | "gate-passed" | "escalated" | "answered" | "closed" | "delegated";
 
 export interface TicketState {
   ticketId: string;
@@ -28,6 +28,9 @@ export interface TicketState {
   stopBlocks: number;
   status: TicketStatus;
   summary?: string;
+  risk?: Risk;
+  /** Flujo del repo al que se delegó (lanes.delegate). */
+  delegatedTo?: string;
 }
 
 export interface JournalEntry {

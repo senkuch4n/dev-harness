@@ -123,6 +123,23 @@ La plantilla supone un monorepo con `apps/api` (NestJS + Jest), `apps/web` (Next
 
 Para varios tickets a la vez, usá un worktree por ticket: la memoria de trabajo es por ticket y no se pisa.
 
+## Modo adaptador: integrarlo a un arnés que ya existe
+
+Si el repo ya tiene su propio arnés (scripts de riesgo, análisis de impacto, revisores, un flujo de HU), dev-harness **no lo reemplaza**: se pone debajo y usa esas piezas. En `.harness/config.json`:
+
+| Clave | Para qué |
+|---|---|
+| `adapters.risk` | Comando que imprime el nivel de riesgo (por ejemplo `./ops/harness/riesgo.sh {base}` → `RIESGO: alto`). Reemplaza a `criticalPaths` |
+| `adapters.testPlan` | Comando que devuelve el JSON de specs y tests afectados (formato `specs-afectados`). Reemplaza a `testImpact`. El gate exige el trabajo commiteado |
+| `lanes.delegate` | Carriles que resuelve el flujo propio del repo (por ejemplo `bugfix` y `full-feature` → "RDD/SDD"). `select_lane` devuelve `delegatedTo` y el gate del plugin no aplica |
+| `lanes.base` | Rama base por carril (por ejemplo `hotfix` → `main`) |
+| `agents` | Rol → subagente del repo (`reviewer` → `reviewer`, `ui-implementer` → `implementer-frontend`) |
+| `memory` | Dónde buscar la historia (`searchPaths`), dónde escribir episodios e incidentes, y cuál es el archivo de lecciones aprobadas |
+| `guard.humanOkForHighRiskPush` | Con riesgo alto, `git push` exige un OK humano registrado con `record_human_ok` para ese HEAD exacto |
+| `commands.typecheck` / `lint` | Un comando, o uno por lado del repo (solo corre si el diff toca esas rutas) |
+
+Los e2e afectados que el gate no corre (si no hay `commands.e2eSpecs`) quedan listados como **pendientes para el revisor**, para que entren en el proceso de revisión que el repo ya tenga.
+
 ## Desarrollo
 
 ```bash
@@ -134,6 +151,8 @@ Después de cambiar `src/`, corré `npm run build` y commiteá `dist/`.
 
 ## Límites conocidos
 
+- El análisis de impacto del adaptador mira commits: por eso el gate pide commitear antes (un commit WIP alcanza).
+- La memoria de trabajo es local a cada máquina. Si trabajás en dos (por ejemplo PC y notebook), la fuente de verdad entre máquinas sigue siendo el ticket.
 - Las guardas de Bash usan expresiones regulares: frenan errores del agente, pero **no son un límite de seguridad**. Mantené el sandbox de Orca y los permisos de Claude Code, y no le des al agente credenciales de producción.
 - El flujo entre pasos lo guía una skill, así que lo sigue el modelo. Lo que no puede saltearse (carril, gate, guardas) lo controla código.
 - Los comandos de Linear se descubren con `orca linear --help` en lugar de estar fijos, porque la CLI de Orca cambia seguido.

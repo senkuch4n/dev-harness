@@ -1,10 +1,19 @@
 {
   "name": "dev-harness",
   "displayName": "Dev Harness",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Arnés agéntico para desarrollo y mantenimiento: triage por tipo/riesgo/urgencia, carriles con patrones distintos, gate determinístico de tests y memoria de tickets.",
-  "author": { "name": "Joel", "url": "https://github.com/senkuch4n" },
+  "author": {
+    "name": "Joel",
+    "url": "https://github.com/senkuch4n"
+  },
   "repository": "https://github.com/senkuch4n/dev-harness",
   "license": "MIT",
-  "keywords": ["harness", "agents", "orca", "ticket", "testing"]
+  "keywords": [
+    "harness",
+    "agents",
+    "orca",
+    "ticket",
+    "testing"
+  ]
 }

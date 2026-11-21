@@ -4,6 +4,9 @@ description: Carril para features de riesgo medio o alto (o escaladas). Spec apr
 ---
 # Carril full-feature
 
+> **Roles, no nombres.** Los subagentes de este playbook son roles. Usá el nombre real que devolvieron `start_ticket`/`select_lane` en `agents` (por ejemplo, el rol `reviewer` puede ser el revisor propio del repo). Si el repo tiene su `CLAUDE.md`/`AGENTS.md` con reglas para un rol (modelo, skills obligatorias, regla de la base de datos), esas reglas mandan.
+
+
 ## 1. Spec (con aprobación humana antes de codear)
 1. Subagente `planner`: escribe `.harness/run/spec-<ticket>.md`.
 2. Mostrale la spec al usuario y **esperá su aprobación explícita**. Si hay cambios, volvé al planner.

@@ -12,6 +12,7 @@ description: Prepara un repo para usar el arnés - crea .harness/config.json ada
    - `criticalPaths`: auth, guards, pagos, migraciones (TypeORM o Prisma), Dockerfiles, compose, nginx y CI.
    - `testImpact`: mapeá cada módulo de NestJS y cada sección de Next.js a los tags de Playwright que existan (`grep -r "@[a-z]" e2e/`). Si los tests e2e no tienen tags, sugerí agregarlos.
    - `servicesUp`: el compose de test con Postgres y Redis.
-5. Mostrale la config al usuario, explicale cada sección y esperá su OK antes de commitear.
+5. **Si el repo ya tiene su propio arnés** (un script de riesgo, uno de specs afectados, revisores propios, un flujo de HU en `CLAUDE.md`/`AGENTS.md`): no dupliques reglas. Usá `adapters.risk`, `adapters.testPlan`, `agents`, `lanes.delegate`, `lanes.base` y `memory.searchPaths` para que el plugin llame a lo que ya existe (ver "Modo adaptador" en el README del plugin).
+6. Mostrale la config al usuario, explicale cada sección y esperá su OK antes de commitear.
 
 Nota: `.harness/config.json` está protegido por el hook. Después del setup, los cambios los hace un humano.

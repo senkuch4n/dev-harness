@@ -1,10 +1,1840 @@
 #!/usr/bin/env node
 import { createRequire as __cr } from 'node:module'; const require = __cr(import.meta.url);
+var __create = Object.create;
 var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __commonJS = (cb, mod) => function __require() {
+  try {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  } catch (e) {
+    throw mod = 0, e;
+  }
+};
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
 };
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+
+// node_modules/picomatch/lib/constants.js
+var require_constants = __commonJS({
+  "node_modules/picomatch/lib/constants.js"(exports, module) {
+    "use strict";
+    var WIN_SLASH = "\\\\/";
+    var WIN_NO_SLASH = `[^${WIN_SLASH}]`;
+    var DEFAULT_MAX_EXTGLOB_RECURSION = 0;
+    var DOT_LITERAL = "\\.";
+    var PLUS_LITERAL = "\\+";
+    var QMARK_LITERAL = "\\?";
+    var SLASH_LITERAL = "\\/";
+    var ONE_CHAR = "(?=.)";
+    var QMARK = "[^/]";
+    var END_ANCHOR = `(?:${SLASH_LITERAL}|$)`;
+    var START_ANCHOR = `(?:^|${SLASH_LITERAL})`;
+    var DOTS_SLASH = `${DOT_LITERAL}{1,2}${END_ANCHOR}`;
+    var NO_DOT = `(?!${DOT_LITERAL})`;
+    var NO_DOTS = `(?!${START_ANCHOR}${DOTS_SLASH})`;
+    var NO_DOT_SLASH = `(?!${DOT_LITERAL}{0,1}${END_ANCHOR})`;
+    var NO_DOTS_SLASH = `(?!${DOTS_SLASH})`;
+    var QMARK_NO_DOT = `[^.${SLASH_LITERAL}]`;
+    var STAR = `${QMARK}*?`;
+    var SEP = "/";
+    var POSIX_CHARS = {
+      DOT_LITERAL,
+      PLUS_LITERAL,
+      QMARK_LITERAL,
+      SLASH_LITERAL,
+      ONE_CHAR,
+      QMARK,
+      END_ANCHOR,
+      DOTS_SLASH,
+      NO_DOT,
+      NO_DOTS,
+      NO_DOT_SLASH,
+      NO_DOTS_SLASH,
+      QMARK_NO_DOT,
+      STAR,
+      START_ANCHOR,
+      SEP
+    };
+    var WINDOWS_CHARS = {
+      ...POSIX_CHARS,
+      SLASH_LITERAL: `[${WIN_SLASH}]`,
+      QMARK: WIN_NO_SLASH,
+      STAR: `${WIN_NO_SLASH}*?`,
+      DOTS_SLASH: `${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$)`,
+      NO_DOT: `(?!${DOT_LITERAL})`,
+      NO_DOTS: `(?!(?:^|[${WIN_SLASH}])${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$))`,
+      NO_DOT_SLASH: `(?!${DOT_LITERAL}{0,1}(?:[${WIN_SLASH}]|$))`,
+      NO_DOTS_SLASH: `(?!${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$))`,
+      QMARK_NO_DOT: `[^.${WIN_SLASH}]`,
+      START_ANCHOR: `(?:^|[${WIN_SLASH}])`,
+      END_ANCHOR: `(?:[${WIN_SLASH}]|$)`,
+      SEP: "\\"
+    };
+    var POSIX_REGEX_SOURCE = {
+      __proto__: null,
+      alnum: "a-zA-Z0-9",
+      alpha: "a-zA-Z",
+      ascii: "\\x00-\\x7F",
+      blank: " \\t",
+      cntrl: "\\x00-\\x1F\\x7F",
+      digit: "0-9",
+      graph: "\\x21-\\x7E",
+      lower: "a-z",
+      print: "\\x20-\\x7E ",
+      punct: "\\-!\"#$%&'()\\*+,./:;<=>?@[\\]^_`{|}~",
+      space: " \\t\\r\\n\\v\\f",
+      upper: "A-Z",
+      word: "A-Za-z0-9_",
+      xdigit: "A-Fa-f0-9"
+    };
+    module.exports = {
+      DEFAULT_MAX_EXTGLOB_RECURSION,
+      MAX_LENGTH: 1024 * 64,
+      POSIX_REGEX_SOURCE,
+      // regular expressions
+      REGEX_BACKSLASH: /\\(?![*+?^${}(|)[\]])/g,
+      REGEX_NON_SPECIAL_CHARS: /^[^@![\].,$*+?^{}()|\\/]+/,
+      REGEX_SPECIAL_CHARS: /[-*+?.^${}(|)[\]]/,
+      REGEX_SPECIAL_CHARS_BACKREF: /(\\?)((\W)(\3*))/g,
+      REGEX_SPECIAL_CHARS_GLOBAL: /([-*+?.^${}(|)[\]])/g,
+      REGEX_REMOVE_BACKSLASH: /(?:\[.*?[^\\]\]|\\(?=.))/g,
+      // Replace globs with equivalent patterns to reduce parsing time.
+      REPLACEMENTS: {
+        __proto__: null,
+        "***": "*",
+        "**/**": "**",
+        "**/**/**": "**"
+      },
+      // Digits
+      CHAR_0: 48,
+      /* 0 */
+      CHAR_9: 57,
+      /* 9 */
+      // Alphabet chars.
+      CHAR_UPPERCASE_A: 65,
+      /* A */
+      CHAR_LOWERCASE_A: 97,
+      /* a */
+      CHAR_UPPERCASE_Z: 90,
+      /* Z */
+      CHAR_LOWERCASE_Z: 122,
+      /* z */
+      CHAR_LEFT_PARENTHESES: 40,
+      /* ( */
+      CHAR_RIGHT_PARENTHESES: 41,
+      /* ) */
+      CHAR_ASTERISK: 42,
+      /* * */
+      // Non-alphabetic chars.
+      CHAR_AMPERSAND: 38,
+      /* & */
+      CHAR_AT: 64,
+      /* @ */
+      CHAR_BACKWARD_SLASH: 92,
+      /* \ */
+      CHAR_CARRIAGE_RETURN: 13,
+      /* \r */
+      CHAR_CIRCUMFLEX_ACCENT: 94,
+      /* ^ */
+      CHAR_COLON: 58,
+      /* : */
+      CHAR_COMMA: 44,
+      /* , */
+      CHAR_DOT: 46,
+      /* . */
+      CHAR_DOUBLE_QUOTE: 34,
+      /* " */
+      CHAR_EQUAL: 61,
+      /* = */
+      CHAR_EXCLAMATION_MARK: 33,
+      /* ! */
+      CHAR_FORM_FEED: 12,
+      /* \f */
+      CHAR_FORWARD_SLASH: 47,
+      /* / */
+      CHAR_GRAVE_ACCENT: 96,
+      /* ` */
+      CHAR_HASH: 35,
+      /* # */
+      CHAR_HYPHEN_MINUS: 45,
+      /* - */
+      CHAR_LEFT_ANGLE_BRACKET: 60,
+      /* < */
+      CHAR_LEFT_CURLY_BRACE: 123,
+      /* { */
+      CHAR_LEFT_SQUARE_BRACKET: 91,
+      /* [ */
+      CHAR_LINE_FEED: 10,
+      /* \n */
+      CHAR_NO_BREAK_SPACE: 160,
+      /* \u00A0 */
+      CHAR_PERCENT: 37,
+      /* % */
+      CHAR_PLUS: 43,
+      /* + */
+      CHAR_QUESTION_MARK: 63,
+      /* ? */
+      CHAR_RIGHT_ANGLE_BRACKET: 62,
+      /* > */
+      CHAR_RIGHT_CURLY_BRACE: 125,
+      /* } */
+      CHAR_RIGHT_SQUARE_BRACKET: 93,
+      /* ] */
+      CHAR_SEMICOLON: 59,
+      /* ; */
+      CHAR_SINGLE_QUOTE: 39,
+      /* ' */
+      CHAR_SPACE: 32,
+      /*   */
+      CHAR_TAB: 9,
+      /* \t */
+      CHAR_UNDERSCORE: 95,
+      /* _ */
+      CHAR_VERTICAL_LINE: 124,
+      /* | */
+      CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279,
+      /* \uFEFF */
+      /**
+       * Create EXTGLOB_CHARS
+       */
+      extglobChars(chars) {
+        return {
+          "!": { type: "negate", open: "(?:(?!(?:", close: `))${chars.STAR})` },
+          "?": { type: "qmark", open: "(?:", close: ")?" },
+          "+": { type: "plus", open: "(?:", close: ")+" },
+          "*": { type: "star", open: "(?:", close: ")*" },
+          "@": { type: "at", open: "(?:", close: ")" }
+        };
+      },
+      /**
+       * Create GLOB_CHARS
+       */
+      globChars(win32) {
+        return win32 === true ? WINDOWS_CHARS : POSIX_CHARS;
+      }
+    };
+  }
+});
+
+// node_modules/picomatch/lib/utils.js
+var require_utils = __commonJS({
+  "node_modules/picomatch/lib/utils.js"(exports) {
+    "use strict";
+    var {
+      REGEX_BACKSLASH,
+      REGEX_REMOVE_BACKSLASH,
+      REGEX_SPECIAL_CHARS,
+      REGEX_SPECIAL_CHARS_GLOBAL
+    } = require_constants();
+    exports.isObject = (val) => val !== null && typeof val === "object" && !Array.isArray(val);
+    exports.hasRegexChars = (str) => REGEX_SPECIAL_CHARS.test(str);
+    exports.isRegexChar = (str) => str.length === 1 && exports.hasRegexChars(str);
+    exports.escapeRegex = (str) => str.replace(REGEX_SPECIAL_CHARS_GLOBAL, "\\$1");
+    exports.toPosixSlashes = (str) => str.replace(REGEX_BACKSLASH, "/");
+    exports.isWindows = () => {
+      if (typeof navigator !== "undefined" && navigator.platform) {
+        const platform = navigator.platform.toLowerCase();
+        return platform === "win32" || platform === "windows";
+      }
+      if (typeof process !== "undefined" && process.platform) {
+        return process.platform === "win32";
+      }
+      return false;
+    };
+    exports.removeBackslashes = (str) => {
+      return str.replace(REGEX_REMOVE_BACKSLASH, (match) => {
+        return match === "\\" ? "" : match;
+      });
+    };
+    exports.escapeLast = (input2, char, lastIdx) => {
+      const idx = input2.lastIndexOf(char, lastIdx);
+      if (idx === -1) return input2;
+      if (input2[idx - 1] === "\\") return exports.escapeLast(input2, char, idx - 1);
+      return `${input2.slice(0, idx)}\\${input2.slice(idx)}`;
+    };
+    exports.removePrefix = (input2, state = {}) => {
+      let output2 = input2;
+      if (output2.startsWith("./")) {
+        output2 = output2.slice(2);
+        state.prefix = "./";
+      }
+      return output2;
+    };
+    exports.wrapOutput = (input2, state = {}, options = {}) => {
+      const prepend = options.contains ? "" : "^";
+      const append = options.contains ? "" : "$";
+      let output2 = `${prepend}(?:${input2})${append}`;
+      if (state.negated === true) {
+        output2 = `(?:^(?!${output2}).*$)`;
+      }
+      return output2;
+    };
+    exports.basename = (path, { windows } = {}) => {
+      const segs = path.split(windows ? /[\\/]/ : "/");
+      const last = segs[segs.length - 1];
+      if (last === "") {
+        return segs[segs.length - 2];
+      }
+      return last;
+    };
+  }
+});
+
+// node_modules/picomatch/lib/scan.js
+var require_scan = __commonJS({
+  "node_modules/picomatch/lib/scan.js"(exports, module) {
+    "use strict";
+    var utils = require_utils();
+    var {
+      CHAR_ASTERISK,
+      /* * */
+      CHAR_AT,
+      /* @ */
+      CHAR_BACKWARD_SLASH,
+      /* \ */
+      CHAR_COMMA,
+      /* , */
+      CHAR_DOT,
+      /* . */
+      CHAR_EXCLAMATION_MARK,
+      /* ! */
+      CHAR_FORWARD_SLASH,
+      /* / */
+      CHAR_LEFT_CURLY_BRACE,
+      /* { */
+      CHAR_LEFT_PARENTHESES,
+      /* ( */
+      CHAR_LEFT_SQUARE_BRACKET,
+      /* [ */
+      CHAR_PLUS,
+      /* + */
+      CHAR_QUESTION_MARK,
+      /* ? */
+      CHAR_RIGHT_CURLY_BRACE,
+      /* } */
+      CHAR_RIGHT_PARENTHESES,
+      /* ) */
+      CHAR_RIGHT_SQUARE_BRACKET
+      /* ] */
+    } = require_constants();
+    var isPathSeparator = (code) => {
+      return code === CHAR_FORWARD_SLASH || code === CHAR_BACKWARD_SLASH;
+    };
+    var depth = (token) => {
+      if (token.isPrefix !== true) {
+        token.depth = token.isGlobstar ? Infinity : 1;
+      }
+    };
+    var scan = (input2, options) => {
+      const opts = options || {};
+      const length = input2.length - 1;
+      const scanToEnd = opts.parts === true || opts.tokens === true || opts.scanToEnd === true;
+      const slashes = [];
+      const tokens = [];
+      const parts = [];
+      let str = input2;
+      let index = -1;
+      let start = 0;
+      let lastIndex = 0;
+      let isBrace = false;
+      let isBracket = false;
+      let isGlob = false;
+      let isExtglob = false;
+      let isGlobstar = false;
+      let braceEscaped = false;
+      let backslashes = false;
+      let negated = false;
+      let negatedExtglob = false;
+      let finished = false;
+      let braces = 0;
+      let prev;
+      let code;
+      let token = { value: "", depth: 0, isGlob: false };
+      const eos = () => index >= length;
+      const peek = () => str.charCodeAt(index + 1);
+      const advance = () => {
+        prev = code;
+        return str.charCodeAt(++index);
+      };
+      while (index < length) {
+        code = advance();
+        let next;
+        if (code === CHAR_BACKWARD_SLASH) {
+          backslashes = token.backslashes = true;
+          code = advance();
+          if (code === CHAR_LEFT_CURLY_BRACE) {
+            braceEscaped = true;
+          }
+          continue;
+        }
+        if (braceEscaped === true || code === CHAR_LEFT_CURLY_BRACE) {
+          braces++;
+          while (eos() !== true && (code = advance())) {
+            if (code === CHAR_BACKWARD_SLASH) {
+              backslashes = token.backslashes = true;
+              advance();
+              continue;
+            }
+            if (code === CHAR_LEFT_CURLY_BRACE) {
+              braces++;
+              continue;
+            }
+            if (braceEscaped !== true && code === CHAR_DOT && (code = advance()) === CHAR_DOT) {
+              isBrace = token.isBrace = true;
+              isGlob = token.isGlob = true;
+              finished = true;
+              if (scanToEnd === true) {
+                continue;
+              }
+              break;
+            }
+            if (braceEscaped !== true && code === CHAR_COMMA) {
+              isBrace = token.isBrace = true;
+              isGlob = token.isGlob = true;
+              finished = true;
+              if (scanToEnd === true) {
+                continue;
+              }
+              break;
+            }
+            if (code === CHAR_RIGHT_CURLY_BRACE) {
+              braces--;
+              if (braces === 0) {
+                braceEscaped = false;
+                isBrace = token.isBrace = true;
+                finished = true;
+                break;
+              }
+            }
+          }
+          if (scanToEnd === true) {
+            continue;
+          }
+          break;
+        }
+        if (code === CHAR_FORWARD_SLASH) {
+          slashes.push(index);
+          tokens.push(token);
+          token = { value: "", depth: 0, isGlob: false };
+          if (finished === true) continue;
+          if (prev === CHAR_DOT && index === start + 1) {
+            start += 2;
+            continue;
+          }
+          lastIndex = index + 1;
+          continue;
+        }
+        if (opts.noext !== true) {
+          const isExtglobChar = code === CHAR_PLUS || code === CHAR_AT || code === CHAR_ASTERISK || code === CHAR_QUESTION_MARK || code === CHAR_EXCLAMATION_MARK;
+          if (isExtglobChar === true && peek() === CHAR_LEFT_PARENTHESES) {
+            isGlob = token.isGlob = true;
+            isExtglob = token.isExtglob = true;
+            finished = true;
+            if (code === CHAR_EXCLAMATION_MARK && index === start) {
+              negatedExtglob = true;
+            }
+            if (scanToEnd === true) {
+              let parens = 0;
+              while (eos() !== true && (code = advance())) {
+                if (code === CHAR_BACKWARD_SLASH) {
+                  backslashes = token.backslashes = true;
+                  advance();
+                  continue;
+                }
+                if (code === CHAR_LEFT_PARENTHESES) {
+                  parens++;
+                  continue;
+                }
+                if (code === CHAR_RIGHT_PARENTHESES && --parens === 0) {
+                  finished = true;
+                  break;
+                }
+              }
+              continue;
+            }
+            break;
+          }
+        }
+        if (code === CHAR_ASTERISK) {
+          if (prev === CHAR_ASTERISK) isGlobstar = token.isGlobstar = true;
+          isGlob = token.isGlob = true;
+          finished = true;
+          if (scanToEnd === true) {
+            continue;
+          }
+          break;
+        }
+        if (code === CHAR_QUESTION_MARK) {
+          isGlob = token.isGlob = true;
+          finished = true;
+          if (scanToEnd === true) {
+            continue;
+          }
+          break;
+        }
+        if (code === CHAR_LEFT_SQUARE_BRACKET) {
+          while (eos() !== true && (next = advance())) {
+            if (next === CHAR_BACKWARD_SLASH) {
+              backslashes = token.backslashes = true;
+              advance();
+              continue;
+            }
+            if (next === CHAR_RIGHT_SQUARE_BRACKET) {
+              isBracket = token.isBracket = true;
+              isGlob = token.isGlob = true;
+              finished = true;
+              break;
+            }
+          }
+          if (scanToEnd === true) {
+            continue;
+          }
+          break;
+        }
+        if (opts.nonegate !== true && code === CHAR_EXCLAMATION_MARK && index === start) {
+          negated = token.negated = true;
+          start++;
+          continue;
+        }
+        if (opts.noparen !== true && code === CHAR_LEFT_PARENTHESES) {
+          isGlob = token.isGlob = true;
+          if (scanToEnd === true) {
+            let parens = 1;
+            while (eos() !== true && (code = advance())) {
+              if (code === CHAR_BACKWARD_SLASH) {
+                backslashes = token.backslashes = true;
+                advance();
+                continue;
+              }
+              if (code === CHAR_LEFT_PARENTHESES) {
+                parens++;
+                continue;
+              }
+              if (code === CHAR_RIGHT_PARENTHESES && --parens === 0) {
+                finished = true;
+                break;
+              }
+            }
+            continue;
+          }
+          break;
+        }
+        if (isGlob === true) {
+          finished = true;
+          if (scanToEnd === true) {
+            continue;
+          }
+          break;
+        }
+      }
+      if (opts.noext === true) {
+        isExtglob = false;
+        isGlob = false;
+      }
+      let base = str;
+      let prefix = "";
+      let glob = "";
+      if (start > 0) {
+        prefix = str.slice(0, start);
+        str = str.slice(start);
+        lastIndex -= start;
+      }
+      if (base && isGlob === true && lastIndex > 0) {
+        base = str.slice(0, lastIndex);
+        glob = str.slice(lastIndex);
+      } else if (isGlob === true) {
+        base = "";
+        glob = str;
+      } else {
+        base = str;
+      }
+      if (base && base !== "" && base !== "/" && base !== str) {
+        if (isPathSeparator(base.charCodeAt(base.length - 1))) {
+          base = base.slice(0, -1);
+        }
+      }
+      if (opts.unescape === true) {
+        if (glob) glob = utils.removeBackslashes(glob);
+        if (base && backslashes === true) {
+          base = utils.removeBackslashes(base);
+        }
+      }
+      const state = {
+        prefix,
+        input: input2,
+        start,
+        base,
+        glob,
+        isBrace,
+        isBracket,
+        isGlob,
+        isExtglob,
+        isGlobstar,
+        negated,
+        negatedExtglob
+      };
+      if (opts.tokens === true) {
+        state.maxDepth = 0;
+        if (!isPathSeparator(code)) {
+          tokens.push(token);
+        }
+        state.tokens = tokens;
+      }
+      if (opts.parts === true || opts.tokens === true) {
+        let prevIndex;
+        for (let idx = 0; idx < slashes.length; idx++) {
+          const n2 = prevIndex !== void 0 ? prevIndex + 1 : start;
+          const i = slashes[idx];
+          const value2 = input2.slice(n2, i);
+          if (opts.tokens) {
+            if (idx === 0 && start !== 0) {
+              tokens[idx].isPrefix = true;
+              tokens[idx].value = prefix;
+            } else {
+              tokens[idx].value = value2;
+            }
+            depth(tokens[idx]);
+            state.maxDepth += tokens[idx].depth;
+          }
+          if (i >= start) {
+            parts.push(value2);
+            prevIndex = i;
+          }
+        }
+        const n = prevIndex !== void 0 ? prevIndex + 1 : start;
+        const value = input2.slice(n);
+        parts.push(value);
+        if (opts.tokens && prevIndex && prevIndex + 1 < input2.length) {
+          tokens[tokens.length - 1].value = value;
+          depth(tokens[tokens.length - 1]);
+          state.maxDepth += tokens[tokens.length - 1].depth;
+        }
+        state.slashes = slashes;
+        state.parts = parts;
+      }
+      return state;
+    };
+    module.exports = scan;
+  }
+});
+
+// node_modules/picomatch/lib/parse.js
+var require_parse = __commonJS({
+  "node_modules/picomatch/lib/parse.js"(exports, module) {
+    "use strict";
+    var constants = require_constants();
+    var utils = require_utils();
+    var {
+      MAX_LENGTH,
+      POSIX_REGEX_SOURCE,
+      REGEX_NON_SPECIAL_CHARS,
+      REGEX_SPECIAL_CHARS_BACKREF,
+      REPLACEMENTS
+    } = constants;
+    var expandRange = (args, options) => {
+      if (typeof options.expandRange === "function") {
+        return options.expandRange(...args, options);
+      }
+      args.sort();
+      const value = `[${args.join("-")}]`;
+      try {
+        new RegExp(value);
+      } catch (ex) {
+        return args.map((v) => utils.escapeRegex(v)).join("..");
+      }
+      return value;
+    };
+    var syntaxError = (type, char) => {
+      return `Missing ${type}: "${char}" - use "\\\\${char}" to match literal characters`;
+    };
+    var splitTopLevel = (input2) => {
+      const parts = [];
+      let bracket = 0;
+      let paren = 0;
+      let quote = 0;
+      let value = "";
+      let escaped = false;
+      for (const ch of input2) {
+        if (escaped === true) {
+          value += ch;
+          escaped = false;
+          continue;
+        }
+        if (ch === "\\") {
+          value += ch;
+          escaped = true;
+          continue;
+        }
+        if (ch === '"') {
+          quote = quote === 1 ? 0 : 1;
+          value += ch;
+          continue;
+        }
+        if (quote === 0) {
+          if (ch === "[") {
+            bracket++;
+          } else if (ch === "]" && bracket > 0) {
+            bracket--;
+          } else if (bracket === 0) {
+            if (ch === "(") {
+              paren++;
+            } else if (ch === ")" && paren > 0) {
+              paren--;
+            } else if (ch === "|" && paren === 0) {
+              parts.push(value);
+              value = "";
+              continue;
+            }
+          }
+        }
+        value += ch;
+      }
+      parts.push(value);
+      return parts;
+    };
+    var isPlainBranch = (branch) => {
+      let escaped = false;
+      for (const ch of branch) {
+        if (escaped === true) {
+          escaped = false;
+          continue;
+        }
+        if (ch === "\\") {
+          escaped = true;
+          continue;
+        }
+        if (/[?*+@!()[\]{}]/.test(ch)) {
+          return false;
+        }
+      }
+      return true;
+    };
+    var normalizeSimpleBranch = (branch) => {
+      let value = branch.trim();
+      let changed = true;
+      while (changed === true) {
+        changed = false;
+        if (/^@\([^\\()[\]{}|]+\)$/.test(value)) {
+          value = value.slice(2, -1);
+          changed = true;
+        }
+      }
+      if (!isPlainBranch(value)) {
+        return;
+      }
+      return value.replace(/\\(.)/g, "$1");
+    };
+    var hasRepeatedCharPrefixOverlap = (branches) => {
+      const values = branches.map(normalizeSimpleBranch).filter(Boolean);
+      for (let i = 0; i < values.length; i++) {
+        for (let j = i + 1; j < values.length; j++) {
+          const a = values[i];
+          const b = values[j];
+          const char = a[0];
+          if (!char || a !== char.repeat(a.length) || b !== char.repeat(b.length)) {
+            continue;
+          }
+          if (a === b || a.startsWith(b) || b.startsWith(a)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+    var parseRepeatedExtglob = (pattern, requireEnd = true) => {
+      if (pattern[0] !== "+" && pattern[0] !== "*" || pattern[1] !== "(") {
+        return;
+      }
+      let bracket = 0;
+      let paren = 0;
+      let quote = 0;
+      let escaped = false;
+      for (let i = 1; i < pattern.length; i++) {
+        const ch = pattern[i];
+        if (escaped === true) {
+          escaped = false;
+          continue;
+        }
+        if (ch === "\\") {
+          escaped = true;
+          continue;
+        }
+        if (ch === '"') {
+          quote = quote === 1 ? 0 : 1;
+          continue;
+        }
+        if (quote === 1) {
+          continue;
+        }
+        if (ch === "[") {
+          bracket++;
+          continue;
+        }
+        if (ch === "]" && bracket > 0) {
+          bracket--;
+          continue;
+        }
+        if (bracket > 0) {
+          continue;
+        }
+        if (ch === "(") {
+          paren++;
+          continue;
+        }
+        if (ch === ")") {
+          paren--;
+          if (paren === 0) {
+            if (requireEnd === true && i !== pattern.length - 1) {
+              return;
+            }
+            return {
+              type: pattern[0],
+              body: pattern.slice(2, i),
+              end: i
+            };
+          }
+        }
+      }
+    };
+    var buildCharClassStar = (chars) => {
+      const source = chars.length === 1 ? utils.escapeRegex(chars[0]) : `[${chars.map((ch) => utils.escapeRegex(ch)).join("")}]`;
+      return `${source}*`;
+    };
+    var getStarExtglobSequenceChars = (pattern) => {
+      let index = 0;
+      const chars = [];
+      while (index < pattern.length) {
+        const match = parseRepeatedExtglob(pattern.slice(index), false);
+        if (!match || match.type !== "*") {
+          return;
+        }
+        const branches = splitTopLevel(match.body).map((branch2) => branch2.trim());
+        if (branches.length !== 1) {
+          return;
+        }
+        const branch = normalizeSimpleBranch(branches[0]);
+        if (!branch || branch.length !== 1) {
+          return;
+        }
+        chars.push(branch);
+        index += match.end + 1;
+      }
+      if (chars.length < 1) {
+        return;
+      }
+      return chars;
+    };
+    var repeatedExtglobRecursion = (pattern) => {
+      let depth = 0;
+      let value = pattern.trim();
+      let match = parseRepeatedExtglob(value);
+      while (match) {
+        depth++;
+        value = match.body.trim();
+        match = parseRepeatedExtglob(value);
+      }
+      return depth;
+    };
+    var analyzeRepeatedExtglob = (body, options) => {
+      if (options.maxExtglobRecursion === false) {
+        return { risky: false };
+      }
+      const max = typeof options.maxExtglobRecursion === "number" ? options.maxExtglobRecursion : constants.DEFAULT_MAX_EXTGLOB_RECURSION;
+      const branches = splitTopLevel(body).map((branch) => branch.trim());
+      if (branches.length > 1) {
+        if (branches.some((branch) => branch === "") || branches.some((branch) => /^[*?]+$/.test(branch)) || hasRepeatedCharPrefixOverlap(branches)) {
+          return { risky: true };
+        }
+      }
+      const safeChars = [];
+      let sawStarSequence = false;
+      let combinable = true;
+      for (const branch of branches) {
+        const chars = getStarExtglobSequenceChars(branch);
+        if (chars) {
+          sawStarSequence = true;
+          safeChars.push(...chars);
+          continue;
+        }
+        const literal2 = normalizeSimpleBranch(branch);
+        if (literal2 && literal2.length === 1) {
+          safeChars.push(literal2);
+          continue;
+        }
+        combinable = false;
+        if (repeatedExtglobRecursion(branch) > max) {
+          return { risky: true };
+        }
+      }
+      if (sawStarSequence) {
+        return combinable ? { risky: true, safeOutput: buildCharClassStar([...new Set(safeChars)]) } : { risky: true };
+      }
+      return { risky: false };
+    };
+    var parse3 = (input2, options) => {
+      if (typeof input2 !== "string") {
+        throw new TypeError("Expected a string");
+      }
+      input2 = REPLACEMENTS[input2] || input2;
+      const opts = { ...options };
+      const max = typeof opts.maxLength === "number" ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
+      let len = input2.length;
+      if (len > max) {
+        throw new SyntaxError(`Input length: ${len}, exceeds maximum allowed length: ${max}`);
+      }
+      const bos = { type: "bos", value: "", output: opts.prepend || "" };
+      const tokens = [bos];
+      const capture = opts.capture ? "" : "?:";
+      const PLATFORM_CHARS = constants.globChars(opts.windows);
+      const EXTGLOB_CHARS = constants.extglobChars(PLATFORM_CHARS);
+      const {
+        DOT_LITERAL,
+        PLUS_LITERAL,
+        SLASH_LITERAL,
+        ONE_CHAR,
+        DOTS_SLASH,
+        NO_DOT,
+        NO_DOT_SLASH,
+        NO_DOTS_SLASH,
+        QMARK,
+        QMARK_NO_DOT,
+        STAR,
+        START_ANCHOR
+      } = PLATFORM_CHARS;
+      const globstar = (opts2) => {
+        return `(${capture}(?:(?!${START_ANCHOR}${opts2.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
+      };
+      const nodot = opts.dot ? "" : NO_DOT;
+      const qmarkNoDot = opts.dot ? QMARK : QMARK_NO_DOT;
+      let star = opts.bash === true ? globstar(opts) : STAR;
+      if (opts.capture) {
+        star = `(${star})`;
+      }
+      if (typeof opts.noext === "boolean") {
+        opts.noextglob = opts.noext;
+      }
+      const state = {
+        input: input2,
+        index: -1,
+        start: 0,
+        dot: opts.dot === true,
+        consumed: "",
+        output: "",
+        prefix: "",
+        backtrack: false,
+        negated: false,
+        brackets: 0,
+        braces: 0,
+        parens: 0,
+        quotes: 0,
+        globstar: false,
+        tokens
+      };
+      input2 = utils.removePrefix(input2, state);
+      len = input2.length;
+      const extglobs = [];
+      const braces = [];
+      const stack = [];
+      let prev = bos;
+      let value;
+      const eos = () => state.index === len - 1;
+      const peek = state.peek = (n = 1) => input2[state.index + n];
+      const advance = state.advance = () => input2[++state.index] || "";
+      const remaining = () => input2.slice(state.index + 1);
+      const consume = (value2 = "", num = 0) => {
+        state.consumed += value2;
+        state.index += num;
+      };
+      const append = (token) => {
+        state.output += token.output != null ? token.output : token.value;
+        consume(token.value);
+      };
+      const negate = () => {
+        let count = 1;
+        while (peek() === "!" && (peek(2) !== "(" || peek(3) === "?")) {
+          advance();
+          state.start++;
+          count++;
+        }
+        if (count % 2 === 0) {
+          return false;
+        }
+        state.negated = true;
+        state.start++;
+        return true;
+      };
+      const increment = (type) => {
+        state[type]++;
+        stack.push(type);
+      };
+      const decrement = (type) => {
+        state[type]--;
+        stack.pop();
+      };
+      const push = (tok) => {
+        if (prev.type === "globstar") {
+          const isBrace = state.braces > 0 && (tok.type === "comma" || tok.type === "brace");
+          const isExtglob = tok.extglob === true || extglobs.length && (tok.type === "pipe" || tok.type === "paren");
+          if (tok.type !== "slash" && tok.type !== "paren" && !isBrace && !isExtglob) {
+            state.output = state.output.slice(0, -prev.output.length);
+            prev.type = "star";
+            prev.value = "*";
+            prev.output = star;
+            state.output += prev.output;
+          }
+        }
+        if (extglobs.length && tok.type !== "paren") {
+          extglobs[extglobs.length - 1].inner += tok.value;
+        }
+        if (tok.value || tok.output) append(tok);
+        if (prev && prev.type === "text" && tok.type === "text") {
+          prev.output = (prev.output || prev.value) + tok.value;
+          prev.value += tok.value;
+          return;
+        }
+        tok.prev = prev;
+        tokens.push(tok);
+        prev = tok;
+      };
+      const extglobOpen = (type, value2) => {
+        const token = { ...EXTGLOB_CHARS[value2], conditions: 1, inner: "" };
+        token.prev = prev;
+        token.parens = state.parens;
+        token.output = state.output;
+        token.startIndex = state.index;
+        token.tokensIndex = tokens.length;
+        const output2 = (opts.capture ? "(" : "") + token.open;
+        increment("parens");
+        push({ type, value: value2, output: state.output ? "" : ONE_CHAR });
+        push({ type: "paren", extglob: true, value: advance(), output: output2 });
+        extglobs.push(token);
+      };
+      const extglobClose = (token) => {
+        const literal2 = input2.slice(token.startIndex, state.index + 1);
+        const body = input2.slice(token.startIndex + 2, state.index);
+        const analysis = analyzeRepeatedExtglob(body, opts);
+        if ((token.type === "plus" || token.type === "star") && analysis.risky) {
+          const safeOutput = analysis.safeOutput ? (token.output ? "" : ONE_CHAR) + (opts.capture ? `(${analysis.safeOutput})` : analysis.safeOutput) : void 0;
+          const open2 = tokens[token.tokensIndex];
+          open2.type = "text";
+          open2.value = literal2;
+          open2.output = safeOutput || utils.escapeRegex(literal2);
+          for (let i = token.tokensIndex + 1; i < tokens.length; i++) {
+            tokens[i].value = "";
+            tokens[i].output = "";
+            delete tokens[i].suffix;
+          }
+          state.output = token.output + open2.output;
+          state.backtrack = true;
+          push({ type: "paren", extglob: true, value, output: "" });
+          decrement("parens");
+          return;
+        }
+        let output2 = token.close + (opts.capture ? ")" : "");
+        let rest;
+        if (token.type === "negate") {
+          let extglobStar = star;
+          if (token.inner && token.inner.length > 1 && token.inner.includes("/")) {
+            extglobStar = globstar(opts);
+          }
+          if (extglobStar !== star || eos() || /^\)+$/.test(remaining())) {
+            output2 = token.close = `)$))${extglobStar}`;
+          }
+          if (token.inner.includes("*") && (rest = remaining()) && /^\.[^\\/.]+$/.test(rest)) {
+            const expression = parse3(rest, { ...options, fastpaths: false }).output;
+            output2 = token.close = `)${expression})${extglobStar})`;
+          }
+          if (token.prev.type === "bos") {
+            state.negatedExtglob = true;
+          }
+        }
+        push({ type: "paren", extglob: true, value, output: output2 });
+        decrement("parens");
+      };
+      if (opts.fastpaths !== false && !/(^[*!]|[/()[\]{}"])/.test(input2)) {
+        let backslashes = false;
+        let output2 = input2.replace(REGEX_SPECIAL_CHARS_BACKREF, (m, esc3, chars, first, rest, index) => {
+          if (first === "\\") {
+            backslashes = true;
+            return m;
+          }
+          if (first === "?") {
+            if (esc3) {
+              return esc3 + first + (rest ? QMARK.repeat(rest.length) : "");
+            }
+            if (index === 0) {
+              return qmarkNoDot + (rest ? QMARK.repeat(rest.length) : "");
+            }
+            return QMARK.repeat(chars.length);
+          }
+          if (first === ".") {
+            return DOT_LITERAL.repeat(chars.length);
+          }
+          if (first === "*") {
+            if (esc3) {
+              return esc3 + first + (rest ? star : "");
+            }
+            return star;
+          }
+          return esc3 ? m : `\\${m}`;
+        });
+        if (backslashes === true) {
+          if (opts.unescape === true) {
+            output2 = output2.replace(/\\/g, "");
+          } else {
+            output2 = output2.replace(/\\+/g, (m) => {
+              return m.length % 2 === 0 ? "\\\\" : m ? "\\" : "";
+            });
+          }
+        }
+        if (output2 === input2 && opts.contains === true) {
+          state.output = input2;
+          return state;
+        }
+        state.output = utils.wrapOutput(output2, state, options);
+        return state;
+      }
+      while (!eos()) {
+        value = advance();
+        if (value === "\0") {
+          continue;
+        }
+        if (value === "\\") {
+          const next = peek();
+          if (next === "/" && opts.bash !== true) {
+            continue;
+          }
+          if (next === "." || next === ";") {
+            continue;
+          }
+          if (!next) {
+            value += "\\";
+            push({ type: "text", value });
+            continue;
+          }
+          const match = /^\\+/.exec(remaining());
+          let slashes = 0;
+          if (match && match[0].length > 2) {
+            slashes = match[0].length;
+            state.index += slashes;
+            if (slashes % 2 !== 0) {
+              value += "\\";
+            }
+          }
+          if (opts.unescape === true) {
+            value = advance();
+          } else {
+            value += advance();
+          }
+          if (state.brackets === 0) {
+            push({ type: "text", value });
+            continue;
+          }
+        }
+        if (state.brackets > 0 && (value !== "]" || prev.value === "[" || prev.value === "[^")) {
+          if (opts.posix !== false && value === ":") {
+            const inner = prev.value.slice(1);
+            if (inner.includes("[")) {
+              prev.posix = true;
+              if (inner.includes(":")) {
+                const idx = prev.value.lastIndexOf("[");
+                const pre = prev.value.slice(0, idx);
+                const rest2 = prev.value.slice(idx + 2);
+                const posix = POSIX_REGEX_SOURCE[rest2];
+                if (posix) {
+                  prev.value = pre + posix;
+                  state.backtrack = true;
+                  advance();
+                  if (!bos.output && tokens.indexOf(prev) === 1) {
+                    bos.output = ONE_CHAR;
+                  }
+                  continue;
+                }
+              }
+            }
+          }
+          if (value === "[" && peek() !== ":" || value === "-" && peek() === "]") {
+            value = `\\${value}`;
+          }
+          if (value === "]" && (prev.value === "[" || prev.value === "[^")) {
+            value = `\\${value}`;
+          }
+          if (opts.posix === true && value === "!" && prev.value === "[") {
+            value = "^";
+          }
+          prev.value += value;
+          append({ value });
+          continue;
+        }
+        if (state.quotes === 1 && value !== '"') {
+          value = utils.escapeRegex(value);
+          prev.value += value;
+          append({ value });
+          continue;
+        }
+        if (value === '"') {
+          state.quotes = state.quotes === 1 ? 0 : 1;
+          if (opts.keepQuotes === true) {
+            push({ type: "text", value });
+          }
+          continue;
+        }
+        if (value === "(") {
+          increment("parens");
+          push({ type: "paren", value });
+          continue;
+        }
+        if (value === ")") {
+          if (state.parens === 0 && opts.strictBrackets === true) {
+            throw new SyntaxError(syntaxError("opening", "("));
+          }
+          const extglob = extglobs[extglobs.length - 1];
+          if (extglob && state.parens === extglob.parens + 1) {
+            extglobClose(extglobs.pop());
+            continue;
+          }
+          push({ type: "paren", value, output: state.parens ? ")" : "\\)" });
+          decrement("parens");
+          continue;
+        }
+        if (value === "[") {
+          if (opts.nobracket === true || !remaining().includes("]")) {
+            if (opts.nobracket !== true && opts.strictBrackets === true) {
+              throw new SyntaxError(syntaxError("closing", "]"));
+            }
+            value = `\\${value}`;
+          } else {
+            increment("brackets");
+          }
+          push({ type: "bracket", value });
+          continue;
+        }
+        if (value === "]") {
+          if (opts.nobracket === true || prev && prev.type === "bracket" && prev.value.length === 1) {
+            push({ type: "text", value, output: `\\${value}` });
+            continue;
+          }
+          if (state.brackets === 0) {
+            if (opts.strictBrackets === true) {
+              throw new SyntaxError(syntaxError("opening", "["));
+            }
+            push({ type: "text", value, output: `\\${value}` });
+            continue;
+          }
+          decrement("brackets");
+          const prevValue = prev.value.slice(1);
+          if (prev.posix !== true && prevValue[0] === "^" && !prevValue.includes("/")) {
+            value = `/${value}`;
+          }
+          prev.value += value;
+          append({ value });
+          if (opts.literalBrackets === false || utils.hasRegexChars(prevValue)) {
+            continue;
+          }
+          const escaped = utils.escapeRegex(prev.value);
+          state.output = state.output.slice(0, -prev.value.length);
+          if (opts.literalBrackets === true) {
+            state.output += escaped;
+            prev.value = escaped;
+            continue;
+          }
+          prev.value = `(${capture}${escaped}|${prev.value})`;
+          state.output += prev.value;
+          continue;
+        }
+        if (value === "{" && opts.nobrace !== true) {
+          increment("braces");
+          const open2 = {
+            type: "brace",
+            value,
+            output: "(",
+            outputIndex: state.output.length,
+            tokensIndex: state.tokens.length
+          };
+          braces.push(open2);
+          push(open2);
+          continue;
+        }
+        if (value === "}") {
+          const brace = braces[braces.length - 1];
+          if (opts.nobrace === true || !brace) {
+            push({ type: "text", value, output: value });
+            continue;
+          }
+          let output2 = ")";
+          if (brace.dots === true) {
+            const arr = tokens.slice();
+            const range = [];
+            for (let i = arr.length - 1; i >= 0; i--) {
+              tokens.pop();
+              if (arr[i].type === "brace") {
+                break;
+              }
+              if (arr[i].type !== "dots") {
+                range.unshift(arr[i].value);
+              }
+            }
+            output2 = expandRange(range, opts);
+            state.backtrack = true;
+          }
+          if (brace.comma !== true && brace.dots !== true) {
+            const out = state.output.slice(0, brace.outputIndex);
+            const toks = state.tokens.slice(brace.tokensIndex);
+            brace.value = brace.output = "\\{";
+            value = output2 = "\\}";
+            state.output = out;
+            for (const t of toks) {
+              state.output += t.output || t.value;
+            }
+          }
+          push({ type: "brace", value, output: output2 });
+          decrement("braces");
+          braces.pop();
+          continue;
+        }
+        if (value === "|") {
+          if (extglobs.length > 0) {
+            extglobs[extglobs.length - 1].conditions++;
+          }
+          push({ type: "text", value });
+          continue;
+        }
+        if (value === ",") {
+          let output2 = value;
+          const brace = braces[braces.length - 1];
+          if (brace && stack[stack.length - 1] === "braces") {
+            brace.comma = true;
+            output2 = "|";
+          }
+          push({ type: "comma", value, output: output2 });
+          continue;
+        }
+        if (value === "/") {
+          if (prev.type === "dot" && state.index === state.start + 1) {
+            state.start = state.index + 1;
+            state.consumed = "";
+            state.output = "";
+            tokens.pop();
+            prev = bos;
+            continue;
+          }
+          push({ type: "slash", value, output: SLASH_LITERAL });
+          continue;
+        }
+        if (value === ".") {
+          if (state.braces > 0 && prev.type === "dot") {
+            if (prev.value === ".") prev.output = DOT_LITERAL;
+            const brace = braces[braces.length - 1];
+            prev.type = "dots";
+            prev.output += value;
+            prev.value += value;
+            brace.dots = true;
+            continue;
+          }
+          if (state.braces + state.parens === 0 && prev.type !== "bos" && prev.type !== "slash") {
+            push({ type: "text", value, output: DOT_LITERAL });
+            continue;
+          }
+          push({ type: "dot", value, output: DOT_LITERAL });
+          continue;
+        }
+        if (value === "?") {
+          const isGroup = prev && prev.value === "(";
+          if (!isGroup && opts.noextglob !== true && peek() === "(" && peek(2) !== "?") {
+            extglobOpen("qmark", value);
+            continue;
+          }
+          if (prev && prev.type === "paren") {
+            const next = peek();
+            let output2 = value;
+            if (prev.value === "(" && !/[!=<:]/.test(next) || next === "<" && !/<([!=]|\w+>)/.test(remaining())) {
+              output2 = `\\${value}`;
+            }
+            push({ type: "text", value, output: output2 });
+            continue;
+          }
+          if (opts.dot !== true && (prev.type === "slash" || prev.type === "bos")) {
+            push({ type: "qmark", value, output: QMARK_NO_DOT });
+            continue;
+          }
+          push({ type: "qmark", value, output: QMARK });
+          continue;
+        }
+        if (value === "!") {
+          if (opts.noextglob !== true && peek() === "(") {
+            if (peek(2) !== "?" || !/[!=<:]/.test(peek(3))) {
+              extglobOpen("negate", value);
+              continue;
+            }
+          }
+          if (opts.nonegate !== true && state.index === 0) {
+            negate();
+            continue;
+          }
+        }
+        if (value === "+") {
+          if (opts.noextglob !== true && peek() === "(" && peek(2) !== "?") {
+            extglobOpen("plus", value);
+            continue;
+          }
+          if (prev && prev.value === "(" || opts.regex === false) {
+            push({ type: "plus", value, output: PLUS_LITERAL });
+            continue;
+          }
+          if (prev && (prev.type === "bracket" || prev.type === "paren" || prev.type === "brace") || state.parens > 0) {
+            push({ type: "plus", value });
+            continue;
+          }
+          push({ type: "plus", value: PLUS_LITERAL });
+          continue;
+        }
+        if (value === "@") {
+          if (opts.noextglob !== true && peek() === "(" && peek(2) !== "?") {
+            push({ type: "at", extglob: true, value, output: "" });
+            continue;
+          }
+          push({ type: "text", value });
+          continue;
+        }
+        if (value !== "*") {
+          if (value === "$" || value === "^") {
+            value = `\\${value}`;
+          }
+          const match = REGEX_NON_SPECIAL_CHARS.exec(remaining());
+          if (match) {
+            value += match[0];
+            state.index += match[0].length;
+          }
+          push({ type: "text", value });
+          continue;
+        }
+        if (prev && (prev.type === "globstar" || prev.star === true)) {
+          prev.type = "star";
+          prev.star = true;
+          prev.value += value;
+          prev.output = star;
+          state.backtrack = true;
+          state.globstar = true;
+          consume(value);
+          continue;
+        }
+        let rest = remaining();
+        if (opts.noextglob !== true && /^\([^?]/.test(rest)) {
+          extglobOpen("star", value);
+          continue;
+        }
+        if (prev.type === "star") {
+          if (opts.noglobstar === true) {
+            consume(value);
+            continue;
+          }
+          const prior = prev.prev;
+          const before = prior.prev;
+          const isStart = prior.type === "slash" || prior.type === "bos";
+          const afterStar = before && (before.type === "star" || before.type === "globstar");
+          if (opts.bash === true && (!isStart || rest[0] && rest[0] !== "/")) {
+            push({ type: "star", value, output: "" });
+            continue;
+          }
+          const isBrace = state.braces > 0 && (prior.type === "comma" || prior.type === "brace");
+          const isExtglob = extglobs.length && (prior.type === "pipe" || prior.type === "paren");
+          if (!isStart && prior.type !== "paren" && !isBrace && !isExtglob) {
+            push({ type: "star", value, output: "" });
+            continue;
+          }
+          while (rest.slice(0, 3) === "/**") {
+            const after = input2[state.index + 4];
+            if (after && after !== "/") {
+              break;
+            }
+            rest = rest.slice(3);
+            consume("/**", 3);
+          }
+          const isEnd = eos() || state.parens > 0 && rest === ")".repeat(state.parens) && !extglobs.some((extglob) => extglob.type === "negate");
+          if (prior.type === "bos" && eos()) {
+            prev.type = "globstar";
+            prev.value += value;
+            prev.output = globstar(opts);
+            state.output = prev.output;
+            state.globstar = true;
+            consume(value);
+            continue;
+          }
+          if (prior.type === "slash" && prior.prev.type !== "bos" && !afterStar && isEnd) {
+            state.output = state.output.slice(0, -(prior.output + prev.output).length);
+            prior.output = `(?:${prior.output}`;
+            prev.type = "globstar";
+            prev.output = globstar(opts) + (opts.strictSlashes ? ")" : "|$)");
+            prev.value += value;
+            state.globstar = true;
+            state.output += prior.output + prev.output;
+            consume(value);
+            continue;
+          }
+          if (prior.type === "slash" && prior.prev.type !== "bos" && rest[0] === "/") {
+            const end = rest[1] !== void 0 ? "|$" : "";
+            state.output = state.output.slice(0, -(prior.output + prev.output).length);
+            prior.output = `(?:${prior.output}`;
+            prev.type = "globstar";
+            prev.output = `${globstar(opts)}${SLASH_LITERAL}|${SLASH_LITERAL}${end})`;
+            prev.value += value;
+            state.output += prior.output + prev.output;
+            state.globstar = true;
+            consume(value + advance());
+            push({ type: "slash", value: "/", output: "" });
+            continue;
+          }
+          if (prior.type === "bos" && rest[0] === "/") {
+            prev.type = "globstar";
+            prev.value += value;
+            prev.output = `(?:^|${SLASH_LITERAL}|${globstar(opts)}${SLASH_LITERAL})`;
+            state.output = prev.output;
+            state.globstar = true;
+            consume(value + advance());
+            push({ type: "slash", value: "/", output: "" });
+            continue;
+          }
+          state.output = state.output.slice(0, -prev.output.length);
+          prev.type = "globstar";
+          prev.output = globstar(opts);
+          prev.value += value;
+          state.output += prev.output;
+          state.globstar = true;
+          consume(value);
+          continue;
+        }
+        const token = { type: "star", value, output: star };
+        if (opts.bash === true) {
+          token.output = ".*?";
+          if (prev.type === "bos" || prev.type === "slash") {
+            token.output = nodot + token.output;
+          }
+          push(token);
+          continue;
+        }
+        if (prev && (prev.type === "bracket" || prev.type === "paren") && opts.regex === true) {
+          token.output = value;
+          push(token);
+          continue;
+        }
+        if (state.index === state.start || prev.type === "slash" || prev.type === "dot") {
+          if (prev.type === "dot") {
+            state.output += NO_DOT_SLASH;
+            prev.output += NO_DOT_SLASH;
+          } else if (opts.dot === true) {
+            state.output += NO_DOTS_SLASH;
+            prev.output += NO_DOTS_SLASH;
+          } else {
+            state.output += nodot;
+            prev.output += nodot;
+          }
+          if (peek() !== "*") {
+            state.output += ONE_CHAR;
+            prev.output += ONE_CHAR;
+          }
+        }
+        push(token);
+      }
+      while (state.brackets > 0) {
+        if (opts.strictBrackets === true) throw new SyntaxError(syntaxError("closing", "]"));
+        state.output = utils.escapeLast(state.output, "[");
+        decrement("brackets");
+      }
+      while (state.parens > 0) {
+        if (opts.strictBrackets === true) throw new SyntaxError(syntaxError("closing", ")"));
+        state.output = utils.escapeLast(state.output, "(");
+        decrement("parens");
+      }
+      while (state.braces > 0) {
+        if (opts.strictBrackets === true) throw new SyntaxError(syntaxError("closing", "}"));
+        state.output = utils.escapeLast(state.output, "{");
+        decrement("braces");
+      }
+      if (opts.strictSlashes !== true && (prev.type === "star" || prev.type === "bracket")) {
+        push({ type: "maybe_slash", value: "", output: `${SLASH_LITERAL}?` });
+      }
+      if (state.backtrack === true) {
+        state.output = "";
+        for (const token of state.tokens) {
+          state.output += token.output != null ? token.output : token.value;
+          if (token.suffix) {
+            state.output += token.suffix;
+          }
+        }
+      }
+      return state;
+    };
+    parse3.fastpaths = (input2, options) => {
+      const opts = { ...options };
+      const max = typeof opts.maxLength === "number" ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
+      const len = input2.length;
+      if (len > max) {
+        throw new SyntaxError(`Input length: ${len}, exceeds maximum allowed length: ${max}`);
+      }
+      input2 = REPLACEMENTS[input2] || input2;
+      const {
+        DOT_LITERAL,
+        SLASH_LITERAL,
+        ONE_CHAR,
+        DOTS_SLASH,
+        NO_DOT,
+        NO_DOTS,
+        NO_DOTS_SLASH,
+        STAR,
+        START_ANCHOR
+      } = constants.globChars(opts.windows);
+      const nodot = opts.dot ? NO_DOTS : NO_DOT;
+      const slashDot = opts.dot ? NO_DOTS_SLASH : NO_DOT;
+      const capture = opts.capture ? "" : "?:";
+      const state = { negated: false, prefix: "" };
+      let star = opts.bash === true ? ".*?" : STAR;
+      if (opts.capture) {
+        star = `(${star})`;
+      }
+      const globstar = (opts2) => {
+        if (opts2.noglobstar === true) return star;
+        return `(${capture}(?:(?!${START_ANCHOR}${opts2.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
+      };
+      const create = (str) => {
+        switch (str) {
+          case "*":
+            return `${nodot}${ONE_CHAR}${star}`;
+          case ".*":
+            return `${DOT_LITERAL}${ONE_CHAR}${star}`;
+          case "*.*":
+            return `${nodot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`;
+          case "*/*":
+            return `${nodot}${star}${SLASH_LITERAL}${ONE_CHAR}${slashDot}${star}`;
+          case "**":
+            return nodot + globstar(opts);
+          case "**/*":
+            return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${ONE_CHAR}${star}`;
+          case "**/*.*":
+            return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`;
+          case "**/.*":
+            return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${DOT_LITERAL}${ONE_CHAR}${star}`;
+          default: {
+            const match = /^(.*?)\.(\w+)$/.exec(str);
+            if (!match) return;
+            const source2 = create(match[1]);
+            if (!source2) return;
+            return source2 + DOT_LITERAL + match[2];
+          }
+        }
+      };
+      const output2 = utils.removePrefix(input2, state);
+      let source = create(output2);
+      if (source && opts.strictSlashes !== true) {
+        source += `${SLASH_LITERAL}?`;
+      }
+      return source;
+    };
+    module.exports = parse3;
+  }
+});
+
+// node_modules/picomatch/lib/picomatch.js
+var require_picomatch = __commonJS({
+  "node_modules/picomatch/lib/picomatch.js"(exports, module) {
+    "use strict";
+    var scan = require_scan();
+    var parse3 = require_parse();
+    var utils = require_utils();
+    var constants = require_constants();
+    var isObject2 = (val) => val && typeof val === "object" && !Array.isArray(val);
+    var picomatch2 = (glob, options, returnState = false) => {
+      if (Array.isArray(glob)) {
+        const fns = glob.map((input2) => picomatch2(input2, options, returnState));
+        const arrayMatcher = (str) => {
+          for (const isMatch of fns) {
+            const state2 = isMatch(str);
+            if (state2) return state2;
+          }
+          return false;
+        };
+        return arrayMatcher;
+      }
+      const isState = isObject2(glob) && glob.tokens && glob.input;
+      if (glob === "" || typeof glob !== "string" && !isState) {
+        throw new TypeError("Expected pattern to be a non-empty string");
+      }
+      const opts = options || {};
+      const posix = opts.windows;
+      const regex = isState ? picomatch2.compileRe(glob, options) : picomatch2.makeRe(glob, options, false, true);
+      const state = regex.state;
+      delete regex.state;
+      let isIgnored = () => false;
+      if (opts.ignore) {
+        const ignoreOpts = { ...options, ignore: null, onMatch: null, onResult: null };
+        isIgnored = picomatch2(opts.ignore, ignoreOpts, returnState);
+      }
+      const matcher = (input2, returnObject = false) => {
+        const { isMatch, match, output: output2 } = picomatch2.test(input2, regex, options, { glob, posix });
+        const result = { glob, state, regex, posix, input: input2, output: output2, match, isMatch };
+        if (typeof opts.onResult === "function") {
+          opts.onResult(result);
+        }
+        if (isMatch === false) {
+          result.isMatch = false;
+          return returnObject ? result : false;
+        }
+        if (isIgnored(input2)) {
+          if (typeof opts.onIgnore === "function") {
+            opts.onIgnore(result);
+          }
+          result.isMatch = false;
+          return returnObject ? result : false;
+        }
+        if (typeof opts.onMatch === "function") {
+          opts.onMatch(result);
+        }
+        return returnObject ? result : true;
+      };
+      if (returnState) {
+        matcher.state = state;
+      }
+      return matcher;
+    };
+    picomatch2.test = (input2, regex, options, { glob, posix } = {}) => {
+      if (typeof input2 !== "string") {
+        throw new TypeError("Expected input to be a string");
+      }
+      if (input2 === "") {
+        return { isMatch: false, output: "" };
+      }
+      const opts = options || {};
+      const format = opts.format || (posix ? utils.toPosixSlashes : null);
+      let match = input2 === glob;
+      let output2 = match && format ? format(input2) : input2;
+      if (match === false) {
+        output2 = format ? format(input2) : input2;
+        match = output2 === glob;
+      }
+      if (match === false || opts.capture === true) {
+        if (opts.matchBase === true || opts.basename === true) {
+          match = picomatch2.matchBase(input2, regex, options, posix);
+        } else {
+          match = regex.exec(output2);
+        }
+      }
+      return { isMatch: Boolean(match), match, output: output2 };
+    };
+    picomatch2.matchBase = (input2, glob, options, posix = options && options.windows) => {
+      const regex = glob instanceof RegExp ? glob : picomatch2.makeRe(glob, options);
+      return regex.test(utils.basename(input2, { windows: posix }));
+    };
+    picomatch2.isMatch = (str, patterns, options) => picomatch2(patterns, options)(str);
+    picomatch2.parse = (pattern, options) => {
+      if (Array.isArray(pattern)) return pattern.map((p) => picomatch2.parse(p, options));
+      return parse3(pattern, { ...options, fastpaths: false });
+    };
+    picomatch2.scan = (input2, options) => scan(input2, options);
+    picomatch2.compileRe = (state, options, returnOutput = false, returnState = false) => {
+      if (returnOutput === true) {
+        return state.output;
+      }
+      const opts = options || {};
+      const prepend = opts.contains ? "" : "^";
+      const append = opts.contains ? "" : "$";
+      let source = `${prepend}(?:${state.output})${append}`;
+      if (state && state.negated === true) {
+        source = `^(?!${source}).*$`;
+      }
+      const regex = picomatch2.toRegex(source, options);
+      if (returnState === true) {
+        regex.state = state;
+      }
+      return regex;
+    };
+    picomatch2.makeRe = (input2, options = {}, returnOutput = false, returnState = false) => {
+      if (!input2 || typeof input2 !== "string") {
+        throw new TypeError("Expected a non-empty string");
+      }
+      let parsed = { negated: false, fastpaths: true };
+      if (options.fastpaths !== false && (input2[0] === "." || input2[0] === "*")) {
+        parsed.output = parse3.fastpaths(input2, options);
+      }
+      if (!parsed.output) {
+        parsed = parse3(input2, options);
+      }
+      return picomatch2.compileRe(parsed, options, returnOutput, returnState);
+    };
+    picomatch2.toRegex = (source, options) => {
+      try {
+        const opts = options || {};
+        return new RegExp(source, opts.flags || (opts.nocase ? "i" : ""));
+      } catch (err) {
+        if (options && options.debug === true) throw err;
+        return /$^/;
+      }
+    };
+    picomatch2.constants = constants;
+    module.exports = picomatch2;
+  }
+});
+
+// node_modules/picomatch/index.js
+var require_picomatch2 = __commonJS({
+  "node_modules/picomatch/index.js"(exports, module) {
+    "use strict";
+    var pico = require_picomatch();
+    var utils = require_utils();
+    function picomatch2(glob, options, returnState = false) {
+      if (options && (options.windows === null || options.windows === void 0)) {
+        options = { ...options, windows: utils.isWindows() };
+      }
+      return pico(glob, options, returnState);
+    }
+    Object.assign(picomatch2, pico);
+    module.exports = picomatch2;
+  }
+});
+
+// src/core/base.ts
+import { execFileSync } from "node:child_process";
+function revExists(repoDir, rev) {
+  try {
+    execFileSync("git", ["rev-parse", "--verify", "--quiet", `${rev}^{commit}`], { cwd: repoDir, stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+function baseRev(repoDir, cfg, lane) {
+  const branch = lane && cfg.lanes.base[lane] || cfg.baseBranch;
+  const remote = `${cfg.remote}/${branch}`;
+  return revExists(repoDir, remote) ? remote : branch;
+}
+function mergeBase(repoDir, cfg, lane) {
+  try {
+    return execFileSync("git", ["merge-base", "HEAD", baseRev(repoDir, cfg, lane)], { cwd: repoDir, encoding: "utf8" }).trim();
+  } catch {
+    return "HEAD";
+  }
+}
+function fill(template, vars) {
+  return template.replace(/\{(\w+)\}/g, (m, k) => k in vars ? vars[k] : m);
+}
 
 // src/core/config.ts
 import { existsSync, readFileSync } from "node:fs";
@@ -19731,49 +21561,118 @@ function date4(params) {
 var ScopedCommand = external_exports.object({
   /** Globs de archivos a los que aplica este comando. */
   paths: external_exports.array(external_exports.string()),
-  /** Comando. Placeholders: {files} (archivos afectados, relativos a cwd), {grep}. */
+  /** Comando. Placeholders: {files} (archivos afectados, relativos a cwd), {base}. */
   command: external_exports.string(),
   /** Directorio desde donde correr el comando (relativo a la raíz). */
   cwd: external_exports.string().default("."),
   /** Si es true, {files} se reescribe relativo a `cwd`. */
   relativeFiles: external_exports.boolean().default(true)
 });
+var CommandOrScoped = external_exports.union([external_exports.string(), external_exports.array(ScopedCommand)]);
 var LaneBudget = external_exports.object({ gateMinutes: external_exports.number().positive() });
+var LaneName = external_exports.enum(["hotfix", "bugfix", "fast-feature", "full-feature", "query", "chore", "human-triage"]);
 var HarnessConfigSchema = external_exports.object({
   baseBranch: external_exports.string().default("main"),
+  /** Remoto contra el que se compara (`<remote>/<baseBranch>`). */
+  remote: external_exports.string().default("origin"),
   protectedBranches: external_exports.array(external_exports.string()).default(["main", "master"]),
-  /** Rutas donde un cambio sube el riesgo (auth, pagos, migraciones, infra). */
+  /** Rutas donde un cambio sube el riesgo (auth, pagos, migraciones, infra). Modo autónomo. */
   criticalPaths: external_exports.array(external_exports.string()).default([]),
-  /** Código compartido: un cambio acá puede afectar todo. */
+  /** Código compartido: un cambio acá puede afectar todo. Modo autónomo. */
   sharedPaths: external_exports.array(external_exports.string()).default([]),
-  /** Test impact analysis: glob -> flujos e2e que lo cubren. */
+  /** Test impact analysis: glob -> flujos e2e que lo cubren. Modo autónomo. */
   testImpact: external_exports.record(external_exports.string(), external_exports.array(external_exports.string())).default({}),
   /** Flujos que siempre se protegen (smoke de hotfix, cambios en código compartido). */
   criticalFlows: external_exports.array(external_exports.string()).default([]),
   /** Cómo se transforma un flujo en el filtro del runner e2e. Ej: "@{flow}". */
   e2eTagFormat: external_exports.string().default("@{flow}"),
   commands: external_exports.object({
-    build: external_exports.string().optional(),
-    lint: external_exports.string().optional(),
-    typecheck: external_exports.string().optional(),
+    build: CommandOrScoped.optional(),
+    lint: CommandOrScoped.optional(),
+    typecheck: CommandOrScoped.optional(),
     unit: external_exports.array(ScopedCommand).default([]),
     integration: external_exports.array(ScopedCommand).default([]),
-    /** Corre e2e filtrados. Placeholder {grep} = tags unidos con "|". */
+    /** Corre e2e filtrados por tag. Placeholder {grep} = tags unidos con "|". */
     e2e: external_exports.string().optional(),
+    /** Corre una lista de specs e2e. Placeholder {specs}. Si falta, los specs quedan para el revisor. */
+    e2eSpecs: external_exports.string().optional(),
     visual: external_exports.string().optional(),
     /** Screenshot de una URL. Placeholders: {url} {out}. */
     screenshot: external_exports.string().optional(),
     /** Comando para servicios que necesitan los tests (Postgres, Redis...). */
     servicesUp: external_exports.string().optional()
   }),
+  /** Usar los scripts que el repo ya tiene en vez de las reglas del arnés. */
+  adapters: external_exports.object({
+    risk: external_exports.object({
+      /** Ej: "./ops/harness/riesgo.sh {base}". Debe imprimir el nivel. */
+      command: external_exports.string(),
+      levelRegex: external_exports.string().default("RIESGO:\\s*(\\w+)"),
+      /** Líneas con archivos que justifican el nivel. Grupo 1 = ruta. */
+      fileRegex: external_exports.string().default("^\\s+(\\S+)\\s+\\("),
+      levels: external_exports.record(external_exports.string(), external_exports.enum(["low", "medium", "high"])).default({
+        bajo: "low",
+        medio: "medium",
+        alto: "high",
+        low: "low",
+        medium: "medium",
+        high: "high"
+      })
+    }).optional(),
+    testPlan: external_exports.object({
+      /** Ej: "node ops/harness/specs-afectados.mjs {base} --hasta HEAD --json". Requiere el trabajo commiteado. */
+      command: external_exports.string(),
+      format: external_exports.literal("specs-afectados").default("specs-afectados"),
+      /** Placeholder {patterns}. */
+      jest: external_exports.string().optional(),
+      /** Placeholder {files}. */
+      nodeTestClient: external_exports.string().optional(),
+      /** Placeholder {files}. */
+      nodeTestHarness: external_exports.string().optional()
+    }).optional()
+  }).default({}),
+  /** Nombre del subagente que cumple cada rol (para reusar los del repo). */
+  agents: external_exports.record(external_exports.string(), external_exports.string()).default({}),
+  lanes: external_exports.object({
+    /** Carriles que resuelve el flujo propio del repo. Valor = cómo se llama ese flujo. */
+    delegate: external_exports.partialRecord(LaneName, external_exports.string()).default({}),
+    /** Rama base por carril (p. ej. hotfix sale de la rama de producción). */
+    base: external_exports.partialRecord(LaneName, external_exports.string()).default({})
+  }).default({ delegate: {}, base: {} }),
+  memory: external_exports.object({
+    /** Dónde buscar tickets e historia (globs). */
+    searchPaths: external_exports.array(external_exports.string()).default([".harness/memory/episodes/*.md", ".harness/memory/incidents/*.md"]),
+    episodesDir: external_exports.string().default(".harness/memory/episodes"),
+    incidentsDir: external_exports.string().default(".harness/memory/incidents"),
+    filePrefix: external_exports.string().default(""),
+    approvedLessons: external_exports.string().default(".harness/memory/lessons/approved.md"),
+    pendingLessonsDir: external_exports.string().default(".harness/memory/lessons/pending")
+  }).default({
+    searchPaths: [".harness/memory/episodes/*.md", ".harness/memory/incidents/*.md"],
+    episodesDir: ".harness/memory/episodes",
+    incidentsDir: ".harness/memory/incidents",
+    filePrefix: "",
+    approvedLessons: ".harness/memory/lessons/approved.md",
+    pendingLessonsDir: ".harness/memory/lessons/pending"
+  }),
   budgets: external_exports.record(external_exports.string(), LaneBudget).default({}),
   guard: external_exports.object({
-    /** Regex (string) de comandos prohibidos para el agente. */
-    forbiddenCommands: external_exports.array(external_exports.object({ pattern: external_exports.string(), reason: external_exports.string() })).default([])
-  }).default({ forbiddenCommands: [] }),
+    /** Regex (string) de comandos prohibidos para el agente. Prefijo "(?i)" = sin distinguir mayúsculas. */
+    forbiddenCommands: external_exports.array(external_exports.object({ pattern: external_exports.string(), reason: external_exports.string() })).default([]),
+    /** Archivos que el agente no puede editar (regex sobre la ruta). */
+    protectedFiles: external_exports.array(external_exports.string()).default([]),
+    /** Con riesgo alto, `git push` exige un OK humano registrado para el HEAD actual. */
+    humanOkForHighRiskPush: external_exports.boolean().default(false),
+    /** El agente no puede editar el archivo de lecciones aprobadas (las cambia un humano). */
+    protectApprovedLessons: external_exports.boolean().default(true)
+  }).default({ forbiddenCommands: [], protectedFiles: [], humanOkForHighRiskPush: false, protectApprovedLessons: true }),
   /** Mitigación de hotfix. Placeholders {flag} {state}. */
   featureFlags: external_exports.object({ toggleCommand: external_exports.string() }).optional(),
-  gate: external_exports.object({ maxAttempts: external_exports.number().int().positive().default(3) }).default({ maxAttempts: 3 }),
+  gate: external_exports.object({
+    maxAttempts: external_exports.number().int().positive().default(3),
+    /** Con adaptador de test plan, exigir que el trabajo esté commiteado antes del gate. */
+    requireCommitted: external_exports.boolean().default(true)
+  }).default({ maxAttempts: 3, requireCommitted: true }),
   triage: external_exports.object({ minConfidence: external_exports.number().min(0).max(1).default(0.7) }).default({ minConfidence: 0.7 })
 });
 var CONFIG_RELATIVE_PATH = ".harness/config.json";
@@ -19792,13 +21691,21 @@ function hasConfig(repoDir) {
 }
 
 // src/core/git.ts
-import { execFileSync } from "node:child_process";
+import { execFileSync as execFileSync2 } from "node:child_process";
 function git(repoDir, args) {
   try {
-    return execFileSync("git", args, { cwd: repoDir, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+    return execFileSync2("git", args, { cwd: repoDir, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
   } catch {
     return "";
   }
+}
+function changedFiles(repoDir, baseRev2) {
+  const base = git(repoDir, ["merge-base", "HEAD", baseRev2]);
+  const committed = base ? git(repoDir, ["diff", "--name-only", `${base}...HEAD`]) : "";
+  const working = git(repoDir, ["diff", "--name-only", "HEAD"]);
+  const untracked = git(repoDir, ["ls-files", "--others", "--exclude-standard"]);
+  const files = [committed, working, untracked].join("\n").split("\n").map((f) => f.trim()).filter(Boolean).filter((f) => !f.startsWith(".harness/run/"));
+  return [...new Set(files)].sort();
 }
 function currentBranch(repoDir) {
   return git(repoDir, ["rev-parse", "--abbrev-ref", "HEAD"]);
@@ -19825,7 +21732,8 @@ function checkBash(command, opts) {
       if (opts.protectedBranches.includes(opts.branch))
         return `Est\xE1s en "${opts.branch}": cre\xE1 una rama para el ticket antes de hacer push.`;
     }
-    if (/^gh\s+pr\s+merge\b/.test(part)) return "El merge lo hace un humano despu\xE9s de revisar el PR.";
+    if (/^gh\s+pr\s+merge\b/.test(part) || /^glab\s+mr\s+merge\b/.test(part)) return "El merge lo hace un humano despu\xE9s de revisar el PR/MR.";
+    if (/ok-humano\.json/.test(part)) return "El OK humano se registra solo con la tool record_human_ok, despu\xE9s de que el usuario lo diga.";
   }
   for (const f of opts.forbidden) {
     if (toRegExp(f.pattern).test(cmd)) return f.reason;
@@ -19835,6 +21743,82 @@ function checkBash(command, opts) {
 function toRegExp(pattern) {
   return pattern.startsWith("(?i)") ? new RegExp(pattern.slice(4), "i") : new RegExp(pattern);
 }
+function isPush(command) {
+  return command.replace(/\s+/g, " ").split(/&&|\|\||;|\|/).some((p) => /^git\b.*\bpush\b/.test(p.trim()));
+}
+
+// src/core/human-ok.ts
+import { existsSync as existsSync2, mkdirSync, readFileSync as readFileSync2, writeFileSync } from "node:fs";
+import { dirname, join as join2 } from "node:path";
+import { execFileSync as execFileSync3 } from "node:child_process";
+var FILE = ".harness/run/ok-humano.json";
+function head(repoDir) {
+  return execFileSync3("git", ["rev-parse", "HEAD"], { cwd: repoDir, encoding: "utf8" }).trim();
+}
+function hasHumanOkForHead(repoDir) {
+  const p = join2(repoDir, FILE);
+  if (!existsSync2(p)) return false;
+  try {
+    return JSON.parse(readFileSync2(p, "utf8")).head === head(repoDir);
+  } catch {
+    return false;
+  }
+}
+
+// src/core/risk.ts
+var import_picomatch = __toESM(require_picomatch2(), 1);
+import { execSync } from "node:child_process";
+function matchesAny(file2, globs) {
+  if (globs.length === 0) return false;
+  return (0, import_picomatch.default)(globs, { dot: true })(file2);
+}
+var LIGHT_LANES = ["fast-feature", "chore"];
+function assessRisk(files, lane, cfg) {
+  const criticalFiles = files.filter((f) => matchesAny(f, cfg.criticalPaths));
+  const sharedFiles = files.filter((f) => matchesAny(f, cfg.sharedPaths));
+  const level = criticalFiles.length ? "high" : files.length ? "medium" : "low";
+  return decide(level, criticalFiles, sharedFiles, lane, cfg, "rutas cr\xEDticas");
+}
+function decide(level, criticalFiles, sharedFiles, lane, cfg, source) {
+  const touchesCritical = level === "high";
+  const touchesShared = sharedFiles.length > 0;
+  const mustEscalate = touchesCritical && LIGHT_LANES.includes(lane);
+  const extraFlows = touchesCritical || touchesShared ? [...cfg.criticalFlows] : [];
+  let reason = `Riesgo ${level}: el diff no toca ${source}.`;
+  if (mustEscalate) {
+    reason = `El carril "${lane}" dio riesgo ALTO (${criticalFiles.join(", ") || "ver salida"}). Se escala a full-feature: hace falta spec aprobada y revisi\xF3n completa.`;
+  } else if (touchesCritical) {
+    reason = `Riesgo ALTO (${criticalFiles.join(", ") || "ver salida"}): revisi\xF3n completa y, si aplica, OK humano antes de pushear.`;
+  } else if (touchesShared) {
+    reason = `Toca c\xF3digo compartido (${sharedFiles.join(", ")}): se agregan los flujos cr\xEDticos al gate.`;
+  }
+  return { level, criticalFiles, sharedFiles, mustEscalate, escalateTo: mustEscalate ? "full-feature" : void 0, extraFlows, reason };
+}
+function parseRiskOutput(output2, cfg) {
+  const a = cfg.adapters.risk;
+  const m = output2.match(new RegExp(a.levelRegex, "m"));
+  const raw = m?.[1]?.toLowerCase() ?? "";
+  const level = a.levels[raw];
+  if (!level) throw new Error(`No pude leer el nivel de riesgo de la salida del script:
+${output2.slice(0, 500)}`);
+  const fileRe = new RegExp(a.fileRegex);
+  const files = output2.split("\n").map((l) => l.match(fileRe)?.[1]).filter((x) => Boolean(x));
+  return { level, files };
+}
+function assessRiskFor(repoDir, files, lane, cfg) {
+  if (!cfg.adapters.risk) return assessRisk(files, lane, cfg);
+  const cmd = fill(cfg.adapters.risk.command, { base: mergeBase(repoDir, cfg, lane) });
+  let out;
+  try {
+    out = execSync(cmd, { cwd: repoDir, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], shell: "/bin/bash" });
+  } catch (e) {
+    const err = e;
+    out = `${err.stdout ?? ""}${err.stderr ?? ""}` || err.message;
+  }
+  const { level, files: justifying } = parseRiskOutput(out, cfg);
+  const sharedFiles = files.filter((f) => matchesAny(f, cfg.sharedPaths));
+  return decide(level, level === "high" ? justifying : [], sharedFiles, lane, cfg, "rutas de riesgo alto");
+}
 
 // src/core/lane-policy.ts
 function laneIsReadOnly(lane) {
@@ -19842,41 +21826,41 @@ function laneIsReadOnly(lane) {
 }
 
 // src/memory/state.ts
-import { appendFileSync, existsSync as existsSync2, mkdirSync, readFileSync as readFileSync2, renameSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync as existsSync3, mkdirSync as mkdirSync2, readFileSync as readFileSync3, renameSync, writeFileSync as writeFileSync2 } from "node:fs";
 import { homedir } from "node:os";
-import { dirname, join as join2 } from "node:path";
+import { dirname as dirname2, join as join3 } from "node:path";
 function dataDir() {
-  return process.env.CLAUDE_PLUGIN_DATA || process.env.DEV_HARNESS_DATA || join2(homedir(), ".dev-harness");
+  return process.env.CLAUDE_PLUGIN_DATA || process.env.DEV_HARNESS_DATA || join3(homedir(), ".dev-harness");
 }
 function stateDir(repoDir) {
-  return join2(dataDir(), "state", repoKey(repoDir));
+  return join3(dataDir(), "state", repoKey(repoDir));
 }
 function safeId(id) {
   return id.replace(/[^\w.-]+/g, "_");
 }
 function statePath(repoDir, ticketId) {
-  return join2(stateDir(repoDir), `${safeId(ticketId)}.json`);
+  return join3(stateDir(repoDir), `${safeId(ticketId)}.json`);
 }
 function loadState(repoDir, ticketId) {
   const p = statePath(repoDir, ticketId);
-  return existsSync2(p) ? JSON.parse(readFileSync2(p, "utf8")) : void 0;
+  return existsSync3(p) ? JSON.parse(readFileSync3(p, "utf8")) : void 0;
 }
 var ACTIVE = ".harness/run/active.json";
 function getActiveTicket(repoDir) {
-  const p = join2(repoDir, ACTIVE);
-  if (!existsSync2(p)) return void 0;
+  const p = join3(repoDir, ACTIVE);
+  if (!existsSync3(p)) return void 0;
   try {
-    return JSON.parse(readFileSync2(p, "utf8")).ticketId;
+    return JSON.parse(readFileSync3(p, "utf8")).ticketId;
   } catch {
     return void 0;
   }
 }
 
 // src/hooks/common.ts
-import { readFileSync as readFileSync3 } from "node:fs";
+import { readFileSync as readFileSync4 } from "node:fs";
 function readInput() {
   try {
-    return JSON.parse(readFileSync3(0, "utf8") || "{}");
+    return JSON.parse(readFileSync4(0, "utf8") || "{}");
   } catch {
     return {};
   }
@@ -19900,7 +21884,7 @@ function guard(fn) {
 }
 
 // src/hooks/pre-tool-guard.ts
-var PROTECTED_FILES = [/(^|\/)\.harness\/config\.json$/, /(^|\/)\.harness\/memory\/lessons\/approved\.md$/];
+var BASE_PROTECTED = [/(^|\/)\.harness\/config\.json$/, /(^|\/)\.harness\/run\/ok-humano\.json$/];
 var EDIT_TOOLS = /* @__PURE__ */ new Set(["Edit", "Write", "MultiEdit", "NotebookEdit"]);
 guard(() => {
   const input2 = readInput();
@@ -19918,11 +21902,21 @@ guard(() => {
       forbidden: cfg.guard.forbiddenCommands
     });
     if (reason) block(reason);
+    if (cfg.guard.humanOkForHighRiskPush && isPush(String(ti.command ?? ""))) {
+      const files = changedFiles(repoDir, baseRev(repoDir, cfg, lane));
+      const risk = assessRiskFor(repoDir, files, lane ?? "bugfix", cfg);
+      if (risk.level === "high" && !hasHumanOkForHead(repoDir)) {
+        block(
+          `Riesgo ALTO (${risk.criticalFiles.slice(0, 5).join(", ") || "ver riesgo"}): no se pushea sin el OK del usuario. Ped\xEDselo explicando qu\xE9 cambia y c\xF3mo se revierte; cuando lo d\xE9, registralo con la tool record_human_ok y reintent\xE1. Integrar en local s\xED est\xE1 permitido.`
+        );
+      }
+    }
     allow();
   }
   if (EDIT_TOOLS.has(tool)) {
     const path = String(ti.file_path ?? ti.notebook_path ?? "");
-    if (PROTECTED_FILES.some((re) => re.test(path))) {
+    const protectedFiles = [...BASE_PROTECTED, ...cfg.guard.protectedFiles.map((p) => new RegExp(p)), ...cfg.guard.protectApprovedLessons ? [new RegExp(`(^|/)${cfg.memory.approvedLessons.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`)] : []];
+    if (protectedFiles.some((re) => re.test(path))) {
       block("Ese archivo define las reglas del arn\xE9s: lo cambia un humano. Si cre\xE9s que hay que cambiarlo, proponelo con propose_lesson o en el resumen del PR.");
     }
     if (lane && laneIsReadOnly(lane)) block(`El carril "${lane}" es de solo lectura: respond\xE9 en el ticket sin editar archivos.`);

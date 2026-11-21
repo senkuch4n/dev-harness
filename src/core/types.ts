@@ -36,9 +36,14 @@ export interface TestPlan {
   deferred: string[];
   budgetMinutes: number;
   notes: string[];
+  /** Lo que el gate no corre y queda para el revisor o la revisión por lote. */
+  pendingForReview: string[];
+  /** El análisis de impacto pidió la suite completa (cambio global o sin mapeo). */
+  fullSuiteRecommended: boolean;
 }
 
 export interface RiskAssessment {
+  level: Risk;
   criticalFiles: string[];
   sharedFiles: string[];
   mustEscalate: boolean;

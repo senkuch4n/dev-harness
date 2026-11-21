@@ -4,6 +4,9 @@ description: Carril para consultas sobre el sistema. Solo lectura, responde en e
 ---
 # Carril query (solo lectura)
 
+> **Roles, no nombres.** Los subagentes de este playbook son roles. Usá el nombre real que devolvieron `start_ticket`/`select_lane` en `agents` (por ejemplo, el rol `reviewer` puede ser el revisor propio del repo). Si el repo tiene su `CLAUDE.md`/`AGENTS.md` con reglas para un rol (modelo, skills obligatorias, regla de la base de datos), esas reglas mandan.
+
+
 En este carril el hook bloquea cualquier edición de archivos.
 
 1. Subagente `query-answerer` con la pregunta.
